@@ -101,7 +101,7 @@ const Signup = () => {
   }
 
   return (
-    <div className="min-h-screen bg-black px-6 py-8">
+    <div className="min-h-screen bg-black md:px-72 px-6 py-8">
       <div className="w-full max-w-sm">
         {/* Header */}
         <div className="flex items-center mb-6">
@@ -109,7 +109,7 @@ const Signup = () => {
             className="w-8 h-8 rounded-full flex items-center justify-center mr-3"
             style={{ background: "linear-gradient(135deg, #A228AF 0%, #FF0000 100%)" }}
           >
-            <ArrowLeft className="w-4 h-4 text-white" onClick={handleGoBack} />
+            <ArrowLeft className="w-4 h-4 text-black" onClick={handleGoBack} />
           </div>
           <h1 className="text-white text-xl font-semibold" style={{ fontFamily: '"Poppins", sans-serif' }}>
             Sign Up
@@ -133,6 +133,7 @@ const Signup = () => {
               background:
                 formData.userType === "individual" ? "linear-gradient(135deg, #A228AF 0%, #FF0000 100%)" : "#374151",
               fontFamily: '"Poppins", sans-serif',
+               borderRadius:'10px 10px 10px 0px ',
             }}
           >
             Individual
@@ -147,6 +148,7 @@ const Signup = () => {
               background:
                 formData.userType === "organization" ? "linear-gradient(135deg, #A228AF 0%, #FF0000 100%)" : "#374151",
               fontFamily: '"Poppins", sans-serif',
+               borderRadius:'10px 10px 10px 0px ',
             }}
           >
             Organization
@@ -302,6 +304,7 @@ const Signup = () => {
             style={{
               background: "linear-gradient(135deg, #A228AF 0%, #FF0000 100%)",
               fontFamily: '"Poppins", sans-serif',
+               borderRadius:'10px 10px 10px 0px ',
             }}
           >
             {isSubmitting ? "Creating Account..." : "Sign Up"}
