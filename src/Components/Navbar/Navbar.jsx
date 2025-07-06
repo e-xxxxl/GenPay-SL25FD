@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { ChevronDown, Menu, X } from "lucide-react"
 import genpayLogo from "../../assets/images/genpaylogo.png" 
+import { Link } from "react-router-dom"
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -36,7 +37,7 @@ const Navbar = () => {
         </div>
 
         {/* Desktop Navigation */}
-        <div className="hidden lg:flex items-center space-x-8">
+        <div className=" hidden lg:flex items-center space-x-8">
           <a
             href="#"
             className="text-white hover:text-gray-300 transition-colors"
@@ -91,7 +92,9 @@ const Navbar = () => {
               borderRadius:'10px 10px 10px 0px ', // Fully rounded button
             }}
           >
-            Sign Up
+            <Link to="/signup" style={{ textDecoration: 'none', color: 'inherit' }}>
+              Sign Up
+            </Link>
           </button>
         </div>
 
