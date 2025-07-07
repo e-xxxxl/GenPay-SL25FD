@@ -166,7 +166,9 @@ const Navbar = () => {
                 fontFamily: '"Poppins", sans-serif',
               }}
             >
+             <Link to="/signup" style={{ textDecoration: 'none', color: 'inherit' }}>
               Sign Up
+            </Link>
             </button>
           </div>
         </div>
