@@ -16,6 +16,7 @@ function App() {
      <Routes>
       <Route path='/' element={<LandingPage/>} />
       <Route path='/signup' element={<SignUpPage/>} />
+      {/* <Route path="/verify-email/:token" element={<EmailVerification />} /> */}
      </Routes>
     </>
   )

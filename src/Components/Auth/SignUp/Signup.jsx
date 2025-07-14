@@ -337,12 +337,52 @@ import axios from "axios"
 import { toast, ToastContainer } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
 
+const nigerianStates = [
+  "Lagos, Ikeja",
+  "Abia, Umuahia",
+  "Adamawa, Yola",
+  "Akwa Ibom, Uyo",
+  "Anambra, Awka",
+  "Bauchi, Bauchi",
+  "Bayelsa, Yenagoa",
+  "Benue, Makurdi",
+  "Borno, Maiduguri",
+  "Cross River, Calabar",
+  "Delta, Asaba",
+  "Ebonyi, Abakaliki",
+  "Edo, Benin City",
+  "Ekiti, Ado Ekiti",
+  "Enugu, Enugu",
+  "FCT, Abuja",
+  "Gombe, Gombe",
+  "Imo, Owerri",
+  "Jigawa, Dutse",
+  "Kaduna, Kaduna",
+  "Kano, Kano",
+  "Katsina, Katsina",
+  "Kebbi, Birnin Kebbi",
+  "Kogi, Lokoja",
+  "Kwara, Ilorin",
+  "Nasarawa, Lafia",
+  "Niger, Minna",
+  "Ogun, Abeokuta",
+  "Ondo, Akure",
+  "Osun, Osogbo",
+  "Oyo, Ibadan",
+  "Plateau, Jos",
+  "Rivers, Port Harcourt",
+  "Sokoto, Sokoto",
+  "Taraba, Jalingo",
+  "Yobe, Damaturu",
+  "Zamfara, Gusau",
+]
+
 const Signup = () => {
-  
   const [formData, setFormData] = useState({
     userType: "individual",
     firstName: "",
     lastName: "",
+    fullName: "", // Added for organization
     email: "",
     phoneNumber: "",
     location: "",
@@ -369,6 +409,7 @@ const Signup = () => {
       userType,
       firstName: "",
       lastName: "",
+      fullName: "",
       email: "",
       phoneNumber: "",
       location: "",
@@ -386,6 +427,9 @@ const Signup = () => {
     }
     if (formData.userType === "individual" && !formData.lastName.trim()) {
       newErrors.lastName = "Last name is required"
+    }
+    if (formData.userType === "organization" && !formData.fullName.trim()) {
+      newErrors.fullName = "Full name is required"
     }
     if (!formData.email.trim()) {
       newErrors.email = formData.userType === "individual" ? "Email is required" : "Brand email is required"
@@ -426,8 +470,8 @@ const Signup = () => {
           "Content-Type": "application/json",
         },
       })
-      localStorage.setItem('token', response.data.token); // Store JWT
 
+      localStorage.setItem("token", response.data.token) // Store JWT
       console.log("Signup successful:", response.data)
 
       // Show success toast
@@ -453,6 +497,7 @@ const Signup = () => {
         userType: "individual",
         firstName: "",
         lastName: "",
+        fullName: "",
         email: "",
         phoneNumber: "",
         location: "",
@@ -517,7 +562,7 @@ const Signup = () => {
   }
 
   return (
-    <div className="min-h-screen bg-black  md:px-72 px-6 py-8">
+    <div className="min-h-screen bg-black md:px-72 px-6 py-8">
       <div className="w-full max-w-sm">
         {/* Header */}
         <div className="flex items-center mb-6">
@@ -550,7 +595,7 @@ const Signup = () => {
               background:
                 formData.userType === "individual" ? "linear-gradient(135deg, #A228AF 0%, #FF0000 100%)" : "#374151",
               fontFamily: '"Poppins", sans-serif',
-               borderRadius:'10px 10px 10px 0px ',
+              borderRadius: "10px 10px 10px 0px",
             }}
           >
             Individual
@@ -565,7 +610,7 @@ const Signup = () => {
               background:
                 formData.userType === "organization" ? "linear-gradient(135deg, #A228AF 0%, #FF0000 100%)" : "#374151",
               fontFamily: '"Poppins", sans-serif',
-               borderRadius:'10px 10px 10px 0px ',
+              borderRadius: "10px 10px 10px 0px",
             }}
           >
             Organization
@@ -582,7 +627,7 @@ const Signup = () => {
               value={formData.firstName}
               onChange={(e) => handleInputChange("firstName", e.target.value)}
               className="w-full px-4 py-3 pr-12 bg-transparent border border-gray-600 rounded-full text-white placeholder-gray-500 focus:outline-none focus:border-gray-400 transition-colors text-sm"
-              style={{ fontFamily: '"Poppins", sans-serif', borderRadius:'15px 15px 15px 0px ', }}
+              style={{ fontFamily: '"Poppins", sans-serif', borderRadius: "15px 15px 15px 0px" }}
             />
             <div
               className="absolute right-3 top-1/2 transform -translate-y-1/2 w-6 h-6 rounded-full flex items-center justify-center"
@@ -591,7 +636,7 @@ const Signup = () => {
               <Plus className="w-3 h-3 text-white" />
             </div>
             {errors.firstName && (
-              <p className="text-red-400 text-xs mt-1" style={{ fontFamily: '"Poppins", sans-serif', borderRadius:'15px 15px 15px 0px ', }}>
+              <p className="text-red-400 text-xs mt-1" style={{ fontFamily: '"Poppins", sans-serif' }}>
                 {errors.firstName}
               </p>
             )}
@@ -606,11 +651,30 @@ const Signup = () => {
                 value={formData.lastName}
                 onChange={(e) => handleInputChange("lastName", e.target.value)}
                 className="w-full px-4 py-3 bg-transparent border border-gray-600 rounded-full text-white placeholder-gray-500 focus:outline-none focus:border-gray-400 transition-colors text-sm"
-                style={{ fontFamily: '"Poppins", sans-serif', borderRadius:'15px 15px 15px 0px ', }}
+                style={{ fontFamily: '"Poppins", sans-serif', borderRadius: "15px 15px 15px 0px" }}
               />
               {errors.lastName && (
                 <p className="text-red-400 text-xs mt-1" style={{ fontFamily: '"Poppins", sans-serif' }}>
                   {errors.lastName}
+                </p>
+              )}
+            </div>
+          )}
+
+          {/* Full Name - Only show for Organization */}
+          {formData.userType === "organization" && (
+            <div>
+              <input
+                type="text"
+                placeholder="Full Name"
+                value={formData.fullName}
+                onChange={(e) => handleInputChange("fullName", e.target.value)}
+                className="w-full px-4 py-3 bg-transparent border border-gray-600 rounded-full text-white placeholder-gray-500 focus:outline-none focus:border-gray-400 transition-colors text-sm"
+                style={{ fontFamily: '"Poppins", sans-serif', borderRadius: "15px 15px 15px 0px" }}
+              />
+              {errors.fullName && (
+                <p className="text-red-400 text-xs mt-1" style={{ fontFamily: '"Poppins", sans-serif' }}>
+                  {errors.fullName}
                 </p>
               )}
             </div>
@@ -624,7 +688,7 @@ const Signup = () => {
               value={formData.email}
               onChange={(e) => handleInputChange("email", e.target.value)}
               className="w-full px-4 py-3 bg-transparent border border-gray-600 rounded-full text-white placeholder-gray-500 focus:outline-none focus:border-gray-400 transition-colors text-sm"
-              style={{ fontFamily: '"Poppins", sans-serif', borderRadius:'15px 15px 15px 0px ', }}
+              style={{ fontFamily: '"Poppins", sans-serif', borderRadius: "15px 15px 15px 0px" }}
             />
             {errors.email && (
               <p className="text-red-400 text-xs mt-1" style={{ fontFamily: '"Poppins", sans-serif' }}>
@@ -641,7 +705,7 @@ const Signup = () => {
               value={formData.phoneNumber}
               onChange={(e) => handleInputChange("phoneNumber", e.target.value)}
               className="w-full px-4 py-3 bg-transparent border border-gray-600 rounded-full text-white placeholder-gray-500 focus:outline-none focus:border-gray-400 transition-colors text-sm"
-              style={{ fontFamily: '"Poppins", sans-serif', borderRadius:'15px 15px 15px 0px ', }}
+              style={{ fontFamily: '"Poppins", sans-serif', borderRadius: "15px 15px 15px 0px" }}
             />
             {errors.phoneNumber && (
               <p className="text-red-400 text-xs mt-1" style={{ fontFamily: '"Poppins", sans-serif' }}>
@@ -652,14 +716,28 @@ const Signup = () => {
 
           {/* Location */}
           <div>
-            <input
-              type="text"
-              placeholder="Location"
+            <select
               value={formData.location}
               onChange={(e) => handleInputChange("location", e.target.value)}
-              className="w-full px-4 py-3 bg-transparent border border-gray-600 rounded-full text-white placeholder-gray-500 focus:outline-none focus:border-gray-400 transition-colors text-sm"
-              style={{ fontFamily: '"Poppins", sans-serif', borderRadius:'15px 15px 15px 0px ', }}
-            />
+              className="w-full px-4 py-3 bg-transparent border border-gray-600 rounded-full text-white focus:outline-none focus:border-gray-400 transition-colors text-sm appearance-none"
+              style={{
+                fontFamily: '"Poppins", sans-serif',
+                borderRadius: "15px 15px 15px 0px",
+                backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' strokeLinecap='round' strokeLinejoin='round' strokeWidth='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
+                backgroundPosition: "right 12px center",
+                backgroundRepeat: "no-repeat",
+                backgroundSize: "16px",
+              }}
+            >
+              <option value="" disabled className="bg-gray-800 text-gray-400">
+                Select Location
+              </option>
+              {nigerianStates.map((state, index) => (
+                <option key={index} value={state} className="bg-gray-800 text-white">
+                  {state}
+                </option>
+              ))}
+            </select>
             {errors.location && (
               <p className="text-red-400 text-xs mt-1" style={{ fontFamily: '"Poppins", sans-serif' }}>
                 {errors.location}
@@ -675,7 +753,7 @@ const Signup = () => {
               value={formData.password}
               onChange={(e) => handleInputChange("password", e.target.value)}
               className="w-full px-4 py-3 pr-12 bg-transparent border border-gray-600 rounded-full text-white placeholder-gray-500 focus:outline-none focus:border-gray-400 transition-colors text-sm"
-              style={{ fontFamily: '"Poppins", sans-serif', borderRadius:'15px 15px 15px 0px ', }}
+              style={{ fontFamily: '"Poppins", sans-serif', borderRadius: "15px 15px 15px 0px" }}
             />
             <button
               type="button"
@@ -699,7 +777,7 @@ const Signup = () => {
               value={formData.confirmPassword}
               onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
               className="w-full px-4 py-3 pr-12 bg-transparent border border-gray-600 rounded-full text-white placeholder-gray-500 focus:outline-none focus:border-gray-400 transition-colors text-sm"
-              style={{ fontFamily: '"Poppins", sans-serif', borderRadius:'15px 15px 15px 0px ', }}
+              style={{ fontFamily: '"Poppins", sans-serif', borderRadius: "15px 15px 15px 0px" }}
             />
             <button
               type="button"
@@ -709,7 +787,7 @@ const Signup = () => {
               {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
             {errors.confirmPassword && (
-              <p className="text-red-400 text-xs mt-1" style={{ fontFamily: '"Poppins", sans-serif', borderRadius:'10px 10px 10px 0px ', }}>
+              <p className="text-red-400 text-xs mt-1" style={{ fontFamily: '"Poppins", sans-serif' }}>
                 {errors.confirmPassword}
               </p>
             )}
@@ -722,8 +800,8 @@ const Signup = () => {
             className="w-full text-white py-3 rounded-full font-medium transition-all duration-200 hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed mt-6 text-sm"
             style={{
               background: "linear-gradient(135deg, #A228AF 0%, #FF0000 100%)",
-              fontFamily: '"Poppins", sans-serif'
-              , borderRadius:'15px 15px 15px 0px ',
+              fontFamily: '"Poppins", sans-serif',
+              borderRadius: "15px 15px 15px 0px",
             }}
           >
             {isSubmitting ? "Creating Account..." : "Sign Up"}
@@ -741,7 +819,8 @@ const Signup = () => {
           </button>
         </div>
       </div>
-       {/* Toast Container */}
+
+      {/* Toast Container */}
       <ToastContainer
         position="top-right"
         autoClose={4000}
@@ -766,5 +845,6 @@ const Signup = () => {
     </div>
   )
 }
+
 
 export default Signup
