@@ -336,6 +336,7 @@ import { ArrowLeft, Eye, EyeOff, Plus } from "lucide-react"
 import axios from "axios"
 import { toast, ToastContainer } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
+import { useNavigate } from "react-router-dom"
 
 const nigerianStates = [
   "Lagos, Ikeja",
@@ -378,6 +379,7 @@ const nigerianStates = [
 ]
 
 const Signup = () => {
+     const navigate = useNavigate();
   const [formData, setFormData] = useState({
     userType: "individual",
     firstName: "",
@@ -472,6 +474,7 @@ const Signup = () => {
       })
 
       localStorage.setItem("token", response.data.token) // Store JWT
+       navigate('/verify-email', { state: { email: formData.email } })
       console.log("Signup successful:", response.data)
 
       // Show success toast

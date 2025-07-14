@@ -6,6 +6,8 @@ import LandingPage from './Components/Pages/LandingPage'
 
 import { Route, Routes } from 'react-router-dom'
 import SignUpPage from './Components/Pages/SignUpPage'
+import VerifyEmailPage from './Components/Pages/VerifyEmailPage'
+import VerifiedPage from './Components/Pages/VerifiedPage'
 
 function App() {
   
@@ -16,7 +18,8 @@ function App() {
      <Routes>
       <Route path='/' element={<LandingPage/>} />
       <Route path='/signup' element={<SignUpPage/>} />
-      {/* <Route path="/verify-email/:token" element={<EmailVerification />} /> */}
+      <Route path='/verify-email' element={<VerifyEmailPage/>} />
+      <Route path="/verified-email/:token" element={<VerifiedPage/>} />
      </Routes>
     </>
   )
