@@ -5,6 +5,7 @@ import { ArrowLeft, Eye, EyeOff } from "lucide-react"
 import axios from "axios"
 import { toast, ToastContainer } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
+import { Link } from "react-router-dom"
 
 const Signin = ({ onNavigate }) => {
   const [formData, setFormData] = useState({
@@ -255,6 +256,18 @@ const Signin = ({ onNavigate }) => {
           >
             Don't have an Account? Click here
           </button>
+          <div>  
+          <Link to="/forgot-password" style={{ textDecoration: 'none', color: 'inherit' }}>       
+            <button
+             onClick={() => onNavigate("/forgot-password")} 
+            className="text-gray-400 hover:text-white text-xs transition-colors"
+            style={{ fontFamily: '"Poppins", sans-serif' }}
+          >
+            Forgot Password?
+          </button>
+          </Link>
+          </div>
+
         </div>
       </div>
 

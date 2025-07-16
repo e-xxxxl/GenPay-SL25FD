@@ -9,6 +9,8 @@ import SignUpPage from './Components/Pages/SignUpPage'
 import VerifyEmailPage from './Components/Pages/VerifyEmailPage'
 import VerifiedPage from './Components/Pages/VerifiedPage'
 import SignInPage from './Components/Pages/SignInPage'
+import ForgotPassPage from './Components/Pages/ForgotPassPage'
+import ResetPassPage from './Components/Pages/ResetPassPage'
 
 function App() {
   
@@ -22,6 +24,9 @@ function App() {
       <Route path='/login' element={<SignInPage/>} />
       <Route path='/verify-email' element={<VerifyEmailPage/>} />
       <Route path="/verified-email/:token" element={<VerifiedPage/>} />
+      <Route path="/forgot-password" element={<ForgotPassPage/>} />
+      <Route path="/reset-password/:token" element={<ResetPassPage/>} />
+     
      </Routes>
     </>
   )
