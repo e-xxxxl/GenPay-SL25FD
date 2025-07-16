@@ -5,11 +5,12 @@ import { ArrowLeft, Eye, EyeOff, Check } from "lucide-react"
 import axios from "axios"
 import { toast, ToastContainer } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
-import { useSearchParams } from "react-router-dom"
+import { useParams, useSearchParams } from "react-router-dom"
 
 const Resetpassword = ({ onNavigate }) => {
-   const [searchParams] = useSearchParams(); // Note: Returns an array
-  const token = searchParams.get("token")
+     const { token } = useParams();
+    const [searchParams] = useSearchParams();
+ console.log("Token from URL:", token); // Verify this shows your JWT token
 
   const [formData, setFormData] = useState({
     newPassword: "",
