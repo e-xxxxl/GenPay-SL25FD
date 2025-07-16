@@ -155,9 +155,9 @@ const Resetpassword = ({ onNavigate }) => {
 
   const handleBackToLogin = () => {
     if (onNavigate) {
-      onNavigate("/signin")
+      onNavigate("/login")
     } else {
-      window.location.href = "/signin"
+      window.location.href = "/login"
     }
   }
 
