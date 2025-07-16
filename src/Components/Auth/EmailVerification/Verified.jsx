@@ -77,7 +77,7 @@ const Verified = ({ onContinue }) => {
       try {
         console.log("Verifying token:", token) // Debug log
 
-        const response = await axios.get(`http://localhost:5000/api/auth/verify-email/${token}`)
+        const response = await axios.get(`https://genpay-sl25bd.onrender.com/api/auth/verify-email/${token}`)
 
         console.log("Verification response:", response.data) // Debug log
 

@@ -14,7 +14,8 @@ const ThirdSection = () => {
           className="text-white text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-6 sm:mb-8 leading-tight"
           style={{ fontFamily: '"Poppins", sans-serif' }}
         >
-          Skip the lines, score the vibes. Buy and sell event tickets with just a tap
+          Bring your event to life. <br />Create, manage, and sell tickets, all with one tap.
+
         </h2>
 
         {/* Subtitle */}
@@ -22,7 +23,7 @@ const ThirdSection = () => {
           className="text-sm sm:text-base md:text-lg mb-8 sm:mb-10 md:mb-12 leading-relaxed max-w-2xl mx-auto"
           style={{ fontFamily: '"Poppins", sans-serif', color: "#BD6666" }}
         >
-          No more waiting in crowded queues. Connect with fellow event-goers and make memories that last a lifetime.
+         Forget the long lines and scattered links. Genpay helps you launch, sell, and grow your event effortlessly while building real connections.
         </p>
 
         {/* CTA Button */}

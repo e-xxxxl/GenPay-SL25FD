@@ -38,13 +38,14 @@ const Navbar = () => {
 
         {/* Desktop Navigation */}
         <div className=" hidden lg:flex items-center space-x-8">
+           <Link to="/" style={{ textDecoration: 'none', color: 'inherit' }}>
           <a
-            href="#"
             className="text-white hover:text-gray-300 transition-colors"
             style={{ fontFamily: '"Poppins", sans-serif' }}
           >
             Home
           </a>
+          </Link>
           <a
             href="#"
             className="text-white hover:text-gray-300 transition-colors"
@@ -72,17 +73,19 @@ const Navbar = () => {
               </div>
             )}
           </div>
+          <Link to="/login" style={{ textDecoration: 'none', color: 'inherit' }}>
           <a
-            href="#"
             className="text-white hover:text-gray-300 transition-colors"
             style={{ fontFamily: '"Poppins", sans-serif' }}
           >
             Login
           </a>
+          </Link>
         </div>
 
         {/* Sign Up Button */}
         <div className="hidden lg:block">
+        <Link to="/signup" style={{ textDecoration: 'none', color: 'inherit' }}>
           <button
             onClick={scrollToWaitlistForm}
             className="text-white px-6 py-2  transition-all duration-300 hover:scale-105"
@@ -92,10 +95,10 @@ const Navbar = () => {
               borderRadius:'10px 10px 10px 0px ', // Fully rounded button
             }}
           >
-            <Link to="/signup" style={{ textDecoration: 'none', color: 'inherit' }}>
+            
               Sign Up
-            </Link>
           </button>
+          </Link>
         </div>
 
       {/* Mobile menu button */}
@@ -117,13 +120,14 @@ const Navbar = () => {
       {isMenuOpen && (
         <div className="lg:hidden absolute top-full left-0 right-0 bg-black z-50 border-t border-gray-800">
           <div className="px-6 py-4 space-y-4">
+            <Link to="/" style={{ textDecoration: 'none', color: 'inherit' }}>
             <a
-              href="#"
               className="block text-gray-400 hover:text-white py-2"
               style={{ fontFamily: '"Poppins", sans-serif' }}
             >
               Home
             </a>
+            </Link>
             <a
               href="#"
               className="block text-gray-400 hover:text-white py-2"
@@ -151,13 +155,16 @@ const Navbar = () => {
                 </div>
               )}
             </div>
+             <Link to="/login" style={{ textDecoration: 'none', color: 'inherit' }}>
             <a
-              href="#"
+              
               className="block text-gray-400 hover:text-white py-2"
               style={{ fontFamily: '"Poppins", sans-serif' }}
             >
               Login
             </a>
+            </Link>
+            <Link to="/signup" style={{ textDecoration: 'none', color: 'inherit' }}>
             <button
               onClick={scrollToWaitlistForm}
               className="text-white px-6 py-2.5 rounded-full w-full font-medium transition-all duration-200"
@@ -166,10 +173,9 @@ const Navbar = () => {
                 fontFamily: '"Poppins", sans-serif',
               }}
             >
-             <Link to="/signup" style={{ textDecoration: 'none', color: 'inherit' }}>
               Sign Up
-            </Link>
             </button>
+            </Link>
           </div>
         </div>
       )}
