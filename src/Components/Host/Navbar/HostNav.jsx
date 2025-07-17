@@ -2,10 +2,10 @@
 
 import { useState } from "react"
 import { ChevronDown, Menu, X } from "lucide-react"
-import genpayLogo from "../../assets/images/genpaylogo.png" 
+import genpayLogo from "../../../assets/images/genpaylogo.png" 
 import { Link } from "react-router-dom"
 
-const Navbar = () => {
+const HostNav = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isGenpayDropdownOpen, setIsGenpayDropdownOpen] = useState(false)
 
@@ -36,52 +36,7 @@ const Navbar = () => {
           />
         </div>
 
-        {/* Desktop Navigation */}
-        <div className=" hidden lg:flex items-center space-x-8">
-           <Link to="/" style={{ textDecoration: 'none', color: 'inherit' }}>
-          <a
-            className="text-white hover:text-gray-300 transition-colors"
-            style={{ fontFamily: '"Poppins", sans-serif' }}
-          >
-            Home
-          </a>
-          </Link>
-          <a
-            href="#"
-            className="text-white hover:text-gray-300 transition-colors"
-            style={{ fontFamily: '"Poppins", sans-serif' }}
-          >
-            Explore
-          </a>
-          <div className="relative">
-            <button
-              onClick={() => setIsGenpayDropdownOpen(!isGenpayDropdownOpen)}
-              className="text-white hover:text-gray-300 transition-colors flex items-center gap-1"
-              style={{ fontFamily: '"Poppins", sans-serif' }}
-            >
-              Genpay
-              <ChevronDown className="w-4 h-4" />
-            </button>
-            {isGenpayDropdownOpen && (
-              <div className="absolute top-full left-0 mt-2 bg-gray-800 rounded-md shadow-lg py-2 min-w-[180px] z-50">
-                <a href="#" className="block px-4 py-2 text-white hover:bg-gray-700 transition-colors">
-                  About Us 
-                </a>
-                <a href="#" className="block px-4 py-2 text-white hover:bg-gray-700 transition-colors">
-                  Get in Touch
-                </a>
-              </div>
-            )}
-          </div>
-          <Link to="/login" style={{ textDecoration: 'none', color: 'inherit' }}>
-          <a
-            className="text-white hover:text-gray-300 transition-colors"
-            style={{ fontFamily: '"Poppins", sans-serif' }}
-          >
-            Login
-          </a>
-          </Link>
-        </div>
+       
 
         {/* Sign Up Button */}
         <div className="hidden lg:block">
@@ -96,7 +51,7 @@ const Navbar = () => {
             }}
           >
             
-              Sign Up
+              New Event
           </button>
           </Link>
         </div>
@@ -183,4 +138,4 @@ const Navbar = () => {
   )
 }
 
-export default Navbar
+export default HostNav
