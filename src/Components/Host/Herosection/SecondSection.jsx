@@ -1,16 +1,17 @@
 "use client"
 
 import { useState } from "react"
+import { useNavigate } from "react-router-dom";
 
 const SecondSection = ({ activeTab = "Dashboard", onTabChange }) => {
   const [currentTab, setCurrentTab] = useState(activeTab)
+  const navigate = useNavigate();
 
   const navigationItems = [
-    { id: "dashboard", label: "Dashboard", path: "/dashboard" },
-    { id: "payout", label: "Payout", path: "/payout" },
-    { id: "control-panel", label: "Control Panel", path: "/control-panel" },
-    { id: "logs", label: "Logs", path: "/logs" },
-    { id: "settings", label: "Settings", path: "/settings" },
+    { id: "event", label: "Event", path: "/dashboard" },
+    { id: "shop", label: "Shop", path: "/shop" },
+    { id: "account", label: "Account", path: "/account" },
+    { id: "logs", label: "Report Issue", path: "/reportissue" }
   ]
 
   const handleTabClick = (item) => {
@@ -23,6 +24,7 @@ const SecondSection = ({ activeTab = "Dashboard", onTabChange }) => {
 
     // Handle navigation - you can customize this based on your routing setup
     console.log(`Navigating to: ${item.path}`)
+    navigate(item.path) // Assuming you have a navigate function or use a router
 
     // For client-side routing, you might use:
     // navigate(item.path) // if using React Router
@@ -37,6 +39,7 @@ const SecondSection = ({ activeTab = "Dashboard", onTabChange }) => {
     <div className="bg-black px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
       <div className="max-w-7xl">
         {/* Navigation Buttons */}
+       
         <div className="flex flex-wrap gap-3 sm:gap-4">
           {navigationItems.map((item) => (
             <button

@@ -13,6 +13,9 @@ import ForgotPassPage from "./Components/Pages/ForgotPassPage";
 import ResetPassPage from "./Components/Pages/ResetPassPage";
 import HostDashPage from "./Components/Pages/HostDashPage";
 import ProtectedRoute from "./Components/ProtectedRoute/ProtectedRoute";
+import ShopPage from "./Components/Pages/ShopPage";
+import AccountPage from "./Components/Pages/AccountPage";
+import EditInfoPage from "./Components/Pages/EditInfoPage";
 
 function App() {
   return (
@@ -26,6 +29,9 @@ function App() {
         <Route path="/forgot-password" element={<ForgotPassPage />} />
         <Route path="/reset-password/:token" element={<ResetPassPage />} />
         <Route path="/dashboard" element={ <ProtectedRoute> <HostDashPage /></ProtectedRoute>}/>
+        <Route path="/shop" element={<ProtectedRoute><ShopPage/></ProtectedRoute>} />
+        <Route path="/account" element={<AccountPage/>} />
+        <Route path="/account/edit" element={<EditInfoPage/>} />
       </Routes>
     </>
   );

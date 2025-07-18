@@ -110,15 +110,6 @@ const HostNav = () => {
                 </div>
               )}
             </div>
-             <Link to="/login" style={{ textDecoration: 'none', color: 'inherit' }}>
-            <a
-              
-              className="block text-gray-400 hover:text-white py-2"
-              style={{ fontFamily: '"Poppins", sans-serif' }}
-            >
-              Login
-            </a>
-            </Link>
             <Link to="/signup" style={{ textDecoration: 'none', color: 'inherit' }}>
             <button
               onClick={scrollToWaitlistForm}
@@ -128,7 +119,7 @@ const HostNav = () => {
                 fontFamily: '"Poppins", sans-serif',
               }}
             >
-              Sign Up
+              Log Out
             </button>
             </Link>
           </div>

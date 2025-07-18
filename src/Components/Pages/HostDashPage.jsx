@@ -3,6 +3,7 @@ import HostNav from '../Host/Navbar/HostNav'
 import Footer from '../Footer/Footer'
 import FirstSection from '../Host/Herosection/FirstSection'
 import SecondSection from '../Host/Herosection/SecondSection'
+import ThirdSection from '../Host/Herosection/ThirdSection'
 
 const HostDashPage = () => {
   return (
@@ -10,8 +11,8 @@ const HostDashPage = () => {
     
     <HostNav/>
     <FirstSection/>
-    <SecondSection/>
-    <Footer/>
+    <SecondSection activeTab="Event" />
+    <ThirdSection/>
     </>
   )
 }
