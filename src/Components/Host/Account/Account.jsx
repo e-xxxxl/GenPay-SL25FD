@@ -5,33 +5,40 @@ import { Edit, CreditCard, User, Mail, Phone, MapPin, Building } from "lucide-re
 import axios from "axios"
 import { useNavigate } from "react-router-dom"
 
-
 const Account = () => {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [payoutInfo, setPayoutInfo] = useState(null)
-  const navigate = useNavigate();
+  const navigate = useNavigate()
+
+  // Email masking function
+  const maskEmail = (email) => {
+    if (!email) return ""
+    const [name, domain] = email.split("@")
+    if (!domain || name.length < 3) return `***@${domain}`
+    const first = name[0]
+    const second = name[1]
+    const last = name[name.length - 1]
+    const masked = "*".repeat(name.length - 2)
+    return `${first}${second}${masked}${last}@${domain}`
+  }
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
         // Get the JWT token from storage
         const token = localStorage.getItem("token")
-
         if (!token) {
           throw new Error("No authentication token found")
         }
-
         // Fetch user profile data
         const userResponse = await axios.get("https://genpay-sl25bd.onrender.com/api/auth/me", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         })
-
         setUser(userResponse.data.data.user)
-
         // Fetch payout information
         try {
           const payoutResponse = await axios.get("https://genpay-sl25bd.onrender.com/api/user/payout-info", {
@@ -51,7 +58,6 @@ const Account = () => {
         setLoading(false)
       }
     }
-
     fetchUserData()
   }, [])
 
@@ -131,8 +137,6 @@ const Account = () => {
 
   return (
     <div className="bg-black min-h-screen">
-
-
       <div className="px-4 sm:px-6 lg:px-8 py-8">
         <div className="max-w-2xl mx-auto space-y-8">
           {/* Personal Information Section */}
@@ -140,31 +144,29 @@ const Account = () => {
             <h2 className="text-white text-lg font-semibold" style={{ fontFamily: '"Poppins", sans-serif' }}>
               Personal Information
             </h2>
-
             <div className="space-y-4">
               {/* First Name */}
               {user?.userType === "individual" && (
-              <div className="flex items-center space-x-3">
-                <User className="w-4 h-4 text-gray-400" />
-                <div>
-                  <p className="text-gray-400 text-sm" style={{ fontFamily: '"Poppins", sans-serif' }}>
-                    First Name: <span className="text-white">{user?.firstName || "Not provided"}</span>
-                  </p>
+                <div className="flex items-center space-x-3">
+                  <User className="w-4 h-4 text-gray-400" />
+                  <div>
+                    <p className="text-gray-400 text-sm" style={{ fontFamily: '"Poppins", sans-serif' }}>
+                      First Name: <span className="text-white">{user?.firstName || "Not provided"}</span>
+                    </p>
+                  </div>
                 </div>
-              </div>
               )}
               {/* BRAND NAME */}
               {user?.userType === "organization" && (
-              <div className="flex items-center space-x-3">
-                <Building className="w-4 h-4 text-gray-400" />
-                <div>
-                  <p className="text-gray-400 text-sm" style={{ fontFamily: '"Poppins", sans-serif' }}>
-                    Organization Name: <span className="text-white">{user?.organizationName || "Not provided"}</span>
-                  </p>
+                <div className="flex items-center space-x-3">
+                  <Building className="w-4 h-4 text-gray-400" />
+                  <div>
+                    <p className="text-gray-400 text-sm" style={{ fontFamily: '"Poppins", sans-serif' }}>
+                      Organization Name: <span className="text-white">{user?.organizationName || "Not provided"}</span>
+                    </p>
+                  </div>
                 </div>
-              </div>
               )}
-
               {/* Last Name - Only show for individuals */}
               {user?.userType === "individual" && (
                 <div className="flex items-center space-x-3">
@@ -176,7 +178,6 @@ const Account = () => {
                   </div>
                 </div>
               )}
-
               {/* Full Name - Only show for organizations */}
               {user?.userType === "organization" && (
                 <div className="flex items-center space-x-3">
@@ -188,17 +189,15 @@ const Account = () => {
                   </div>
                 </div>
               )}
-
-              {/* Email Address */}
+              {/* Email Address - MASKED */}
               <div className="flex items-center space-x-3">
                 <Mail className="w-4 h-4 text-gray-400" />
                 <div>
                   <p className="text-gray-400 text-sm" style={{ fontFamily: '"Poppins", sans-serif' }}>
-                    Email Address: <span className="text-white">{user?.email || "Not provided"}</span>
+                    Email Address: <span className="text-white">{maskEmail(user?.email) || "Not provided"}</span>
                   </p>
                 </div>
               </div>
-
               {/* Phone Number */}
               <div className="flex items-center space-x-3">
                 <Phone className="w-4 h-4 text-gray-400" />
@@ -208,7 +207,6 @@ const Account = () => {
                   </p>
                 </div>
               </div>
-
               {/* Location */}
               <div className="flex items-center space-x-3">
                 <MapPin className="w-4 h-4 text-gray-400" />
@@ -218,7 +216,6 @@ const Account = () => {
                   </p>
                 </div>
               </div>
-
               {/* User Type */}
               <div className="flex items-center space-x-3">
                 <Building className="w-4 h-4 text-gray-400" />
@@ -229,7 +226,6 @@ const Account = () => {
                 </div>
               </div>
             </div>
-
             {/* Edit Personal Info Button */}
             <button
               onClick={handleEditPersonalInfo}
@@ -244,13 +240,11 @@ const Account = () => {
               Edit Personal Info
             </button>
           </div>
-
           {/* Payout Information Section */}
           <div className="space-y-6">
             <h2 className="text-white text-lg font-semibold" style={{ fontFamily: '"Poppins", sans-serif' }}>
               Payout Information
             </h2>
-
             {payoutInfo ? (
               <div className="space-y-4">
                 {/* Bank Name */}
@@ -262,7 +256,6 @@ const Account = () => {
                     </p>
                   </div>
                 </div>
-
                 {/* Account Number */}
                 <div className="flex items-center space-x-3">
                   <CreditCard className="w-4 h-4 text-gray-400" />
@@ -272,7 +265,6 @@ const Account = () => {
                     </p>
                   </div>
                 </div>
-
                 {/* Account Name */}
                 <div className="flex items-center space-x-3">
                   <User className="w-4 h-4 text-gray-400" />
@@ -282,7 +274,6 @@ const Account = () => {
                     </p>
                   </div>
                 </div>
-
                 {/* Edit Payout Info Button */}
                 <button
                   onClick={handleAddPayoutInfo}
@@ -302,7 +293,6 @@ const Account = () => {
                 <p className="text-gray-400 text-sm" style={{ fontFamily: '"Poppins", sans-serif' }}>
                   No payout information added yet.
                 </p>
-
                 {/* Add Payout Info Button */}
                 <button
                   onClick={handleAddPayoutInfo}
@@ -319,13 +309,11 @@ const Account = () => {
               </div>
             )}
           </div>
-
           {/* Account Status */}
           <div className="space-y-4">
             <h2 className="text-white text-lg font-semibold" style={{ fontFamily: '"Poppins", sans-serif' }}>
               Account Status
             </h2>
-
             <div className="flex items-center space-x-3">
               <div className={`w-3 h-3 rounded-full ${user?.isVerified ? "bg-green-500" : "bg-yellow-500"}`} />
               <p className="text-gray-400 text-sm" style={{ fontFamily: '"Poppins", sans-serif' }}>
@@ -335,7 +323,6 @@ const Account = () => {
                 </span>
               </p>
             </div>
-
             <div className="flex items-center space-x-3">
               <div className="w-3 h-3 rounded-full bg-green-500" />
               <p className="text-gray-400 text-sm" style={{ fontFamily: '"Poppins", sans-serif' }}>

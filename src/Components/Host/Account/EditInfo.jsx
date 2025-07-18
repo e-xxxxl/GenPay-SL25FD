@@ -62,6 +62,18 @@ const EditInfo = ({ onNavigate }) => {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errors, setErrors] = useState({})
 
+  // Email masking function
+  const maskEmail = (email) => {
+    if (!email) return ""
+    const [name, domain] = email.split("@")
+    if (!domain || name.length < 3) return `***@${domain}`
+    const first = name[0]
+    const second = name[1]
+    const last = name[name.length - 1]
+    const masked = "*".repeat(name.length - 2)
+    return `${first}${second}${masked}${last}@${domain}`
+  }
+
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -139,11 +151,7 @@ const EditInfo = ({ onNavigate }) => {
       newErrors.fullName = "Full name is required"
     }
 
-    if (!formData.email.trim()) {
-      newErrors.email = "Email is required"
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = "Email is invalid"
-    }
+    // Email validation removed since it's now read-only
 
     if (!formData.phoneNumber.trim()) {
       newErrors.phoneNumber = "Phone number is required"
@@ -158,7 +166,10 @@ const EditInfo = ({ onNavigate }) => {
   }
 
   const hasChanges = () => {
-    return JSON.stringify(formData) !== JSON.stringify(originalData)
+    // Exclude email from change detection since it's read-only
+    const { email: originalEmail, ...originalWithoutEmail } = originalData
+    const { email: currentEmail, ...currentWithoutEmail } = formData
+    return JSON.stringify(currentWithoutEmail) !== JSON.stringify(originalWithoutEmail)
   }
 
   const handleSubmit = async (e) => {
@@ -191,7 +202,10 @@ const EditInfo = ({ onNavigate }) => {
     try {
       const token = localStorage.getItem("token")
 
-      const response = await axios.put("https://genpay-sl25bd.onrender.com/api/auth/update-profile", formData, {
+      // Exclude email from the update payload since it's read-only
+      const { email, ...updateData } = formData
+
+      const response = await axios.put("https://genpay-sl25bd.onrender.com/api/auth/update-profile", updateData, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -412,7 +426,7 @@ const EditInfo = ({ onNavigate }) => {
             </div>
           )}
 
-          {/* Email Address */}
+          {/* Email Address - MASKED AND READ-ONLY */}
           <div>
             <div className="flex items-center space-x-2 mb-2">
               <Mail className="w-4 h-4 text-gray-400" />
@@ -420,19 +434,15 @@ const EditInfo = ({ onNavigate }) => {
                 Email Address
               </label>
             </div>
-            <input
-              type="email"
-              placeholder="Email Address"
-              value={formData.email}
-              onChange={(e) => handleInputChange("email", e.target.value)}
-              className="w-full px-4 py-3 bg-transparent border border-gray-600 rounded-full text-white placeholder-gray-500 focus:outline-none focus:border-gray-400 transition-colors text-sm"
+            <div
+              className="w-full px-4 py-3 border border-gray-600 rounded-full text-gray-400 text-sm bg-gray-800/50"
               style={{ fontFamily: '"Poppins", sans-serif', borderRadius: "15px 15px 15px 0px" }}
-            />
-            {errors.email && (
-              <p className="text-red-400 text-xs mt-1" style={{ fontFamily: '"Poppins", sans-serif' }}>
-                {errors.email}
-              </p>
-            )}
+            >
+              {maskEmail(formData.email) || "Not provided"}
+            </div>
+            <p className="text-gray-500 text-xs mt-1" style={{ fontFamily: '"Poppins", sans-serif' }}>
+              Email address cannot be changed for security reasons
+            </p>
           </div>
 
           {/* Phone Number */}
