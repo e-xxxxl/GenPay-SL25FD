@@ -76,7 +76,7 @@ const FirstSection = () => {
             className="text-white text-sm sm:text-base md:text-lg lg:text-xl leading-relaxed mb-4 sm:mb-6 md:mb-8"
             style={{ fontFamily: '"Poppins", sans-serif' }}
           >
-            GenPay exists to power meaningful experiences through technology, trust, and vibrant human connection.
+            Genpay exists to power meaningful experiences through technology, trust, and vibrant human connection.
           </p>
 
           <p
@@ -93,7 +93,7 @@ const FirstSection = () => {
             className="bg-black text-white px-4 sm:px-6 md:px-8 py-2.5 sm:py-3 rounded-lg font-medium hover:bg-gray-900 transition-colors duration-200 text-sm sm:text-base w-full sm:w-auto"
             style={{ fontFamily: '"Poppins", sans-serif' }}
           >
-            Start your experience
+            Explore now
           </button>
         </div>
       </div>

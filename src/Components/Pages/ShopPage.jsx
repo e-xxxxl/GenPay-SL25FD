@@ -11,7 +11,6 @@ const ShopPage = () => {
         <HostNav/>
         <SecondSection activeTab="Shop" />
       <Shop/>
-      <Footer/>
     </>
   )
 }

@@ -60,7 +60,7 @@ const Shop = () => {
             </p>
 
             <p className="text-gray-500 text-sm leading-relaxed" style={{ fontFamily: '"Poppins", sans-serif' }}>
-              We're working hard to bring you an amazing shopping experience. Get notified when our shop goes live!
+              We're working hard to bring you an amazing shopping experience. You will get notified when our shop goes live!
             </p>
           </div>
 

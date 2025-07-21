@@ -17,6 +17,7 @@ import ShopPage from "./Components/Pages/ShopPage";
 import AccountPage from "./Components/Pages/AccountPage";
 import EditInfoPage from "./Components/Pages/EditInfoPage";
 import IssuesPage from "./Components/Pages/IssuesPage";
+import CreateEventPage from "./Components/Pages/CreateEventPage";
 
 function App() {
   return (
@@ -34,6 +35,7 @@ function App() {
         <Route path="/account" element={<AccountPage/>} />
         <Route path="/account/edit" element={<EditInfoPage/>} />
         <Route path="/reportissue" element={<IssuesPage/>} />
+        <Route path="/create-event" element={<CreateEventPage/>} />
       </Routes>
     </>
   );

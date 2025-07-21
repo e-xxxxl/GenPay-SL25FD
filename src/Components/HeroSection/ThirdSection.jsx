@@ -36,6 +36,7 @@ const ThirdSection = () => {
                  borderRadius: "50px 50px 50px 0px",
               }}
         >
+          
           Create your first event
         </button>
       </div>

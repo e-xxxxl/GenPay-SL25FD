@@ -367,18 +367,6 @@ const Contact = ({ onNavigate }) => {
               above.
             </p>
           </div>
-
-          {/* Business Hours */}
-          <div className="mt-4 p-4 bg-gray-900/30 rounded-lg border border-gray-800">
-            <p className="text-white text-sm font-medium mb-2" style={{ fontFamily: '"Poppins", sans-serif' }}>
-              Business Hours
-            </p>
-            <div className="text-gray-400 text-xs space-y-1" style={{ fontFamily: '"Poppins", sans-serif' }}>
-              <p>Monday - Friday: 9:00 AM - 6:00 PM (WAT)</p>
-              <p>Saturday: 10:00 AM - 4:00 PM (WAT)</p>
-              <p>Sunday: Closed</p>
-            </div>
-          </div>
         </div>
       </div>
 

@@ -90,6 +90,7 @@ const HostNav = () => {
             >
               Explore
             </a>
+            
             <div className="py-2">
               <button
                 onClick={() => setIsGenpayDropdownOpen(!isGenpayDropdownOpen)}
@@ -109,8 +110,16 @@ const HostNav = () => {
                   </a>
                 </div>
               )}
+
             </div>
-            <Link to="/signup" style={{ textDecoration: 'none', color: 'inherit' }}>
+            <a
+              href="#"
+              className="block text-gray-400 hover:text-white py-2"
+              style={{ fontFamily: '"Poppins", sans-serif' }}
+            >
+              Logout
+            </a>
+            <Link to="/create-event" style={{ textDecoration: 'none', color: 'inherit' }}>
             <button
               onClick={scrollToWaitlistForm}
               className="text-white px-6 py-2.5 rounded-full w-full font-medium transition-all duration-200"
@@ -119,7 +128,7 @@ const HostNav = () => {
                 fontFamily: '"Poppins", sans-serif',
               }}
             >
-              Log Out
+              Create New event
             </button>
             </Link>
           </div>

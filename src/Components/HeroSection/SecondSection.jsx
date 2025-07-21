@@ -35,7 +35,7 @@ const SecondSection = () => {
               className="text-sm sm:text-base md:text-lg mb-6 sm:mb-8 leading-relaxed"
               style={{ fontFamily: '"Poppins", sans-serif', color: "#BD6666" }}
             >
-              Stop scrolling and start browsing through events that speak your language — no maps, just fun.
+              Stop scrolling and start browsing through events that speak your language, no maps, just fun.
             </p>
 
             {/* CTA Button */}

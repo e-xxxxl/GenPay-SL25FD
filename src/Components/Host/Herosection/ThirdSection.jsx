@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { MoreVertical, Plus, Calendar, MapPin, Users } from "lucide-react"
+import { Link } from "react-router-dom"
 
 const ThirdSection = ({ onCreateEvent, onEventClick }) => {
   const [events, setEvents] = useState([])
@@ -271,7 +272,8 @@ const ThirdSection = ({ onCreateEvent, onEventClick }) => {
             }}
           >
             <Plus className="w-4 h-4 mr-2" />
-            Create New Event
+            <Link to="/create-event">Create New Event</Link>
+
           </button>
         </div>
       </div>
