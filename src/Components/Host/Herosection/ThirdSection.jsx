@@ -162,7 +162,10 @@ const ThirdSection = ({ onCreateEvent, onEventClick }) => {
                 borderRadius: "15px 15px 15px 0px",
               }}
             >
+              <Link to='/create-event'>
+              
               New Event
+              </Link>
             </button>
           </div>
         </div>
