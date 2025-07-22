@@ -18,6 +18,8 @@ import AccountPage from "./Components/Pages/AccountPage";
 import EditInfoPage from "./Components/Pages/EditInfoPage";
 import IssuesPage from "./Components/Pages/IssuesPage";
 import CreateEventPage from "./Components/Pages/CreateEventPage";
+import UploadEventHeaderPage from "./Components/Pages/UploadEventHeaderPage";
+import UploadEventGalleryPage from "./Components/Pages/UploadEventGalleryPage";
 
 function App() {
   return (
@@ -36,6 +38,8 @@ function App() {
         <Route path="/account/edit" element={<EditInfoPage/>} />
         <Route path="/reportissue" element={<IssuesPage/>} />
         <Route path="/create-event" element={<CreateEventPage/>} />
+        <Route path="/create-event/upload-event-image" element={<UploadEventHeaderPage/>} />
+        <Route path="/create-event/upload-event-gallery" element={<UploadEventGalleryPage/>} />
       </Routes>
     </>
   );

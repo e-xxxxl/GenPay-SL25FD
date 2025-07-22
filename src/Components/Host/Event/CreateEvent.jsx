@@ -233,7 +233,7 @@ const CreateEvent = ({ onNavigate }) => {
       // Navigate to events dashboard after successful creation
       setTimeout(() => {
         if (onNavigate) {
-          onNavigate("/dashboard")
+          onNavigate("/create-event/upload-event-image")
         } else {
           window.location.href = "/dashboard"
         }
