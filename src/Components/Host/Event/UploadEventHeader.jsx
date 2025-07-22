@@ -98,7 +98,7 @@ const navigate = useNavigate()
       formData.append("imageType", "header") // Specify this is a header image
 
       // Upload to backend
-      const response = await axios.post("http://localhost:5000/api/events/upload-image", formData, {
+      const response = await axios.post("https://genpay-sl25bd.onrender.com/api/events/upload-image", formData, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data",

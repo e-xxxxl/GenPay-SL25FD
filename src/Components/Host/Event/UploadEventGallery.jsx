@@ -131,7 +131,7 @@ const UploadEventGallery = ({ onNavigate, onGalleryUpload, onSkip, onContinue })
         formData.append("imageType", "gallery")
 
         try {
-          const response = await axios.post("http://localhost:5000/api/events/upload-gallery", formData, {
+          const response = await axios.post("https://genpay-sl25bd.onrender.com/api/events/upload-gallery", formData, {
             headers: {
               Authorization: `Bearer ${token}`,
               "Content-Type": "multipart/form-data",
