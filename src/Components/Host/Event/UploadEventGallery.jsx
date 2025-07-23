@@ -1,33 +1,36 @@
 "use client"
-
-import { useState, useRef } from "react"
-import { ArrowLeft, Plus, ImageIcon, X, Upload } from "lucide-react"
-import { toast, ToastContainer } from "react-toastify"
-import "react-toastify/dist/ReactToastify.css"
-import axios from "axios"
+import { useState, useRef } from "react";
+import { ArrowLeft, Plus, ImageIcon, X, Upload } from "lucide-react";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import axios from "axios";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const UploadEventGallery = ({ onNavigate, onGalleryUpload, onSkip, onContinue }) => {
-  const [selectedImages, setSelectedImages] = useState([])
-  const [isDragging, setIsDragging] = useState(false)
-  const fileInputRef = useRef(null)
-  const [isUploading, setIsUploading] = useState(false)
-  const [uploadProgress, setUploadProgress] = useState({})
-  const [uploadedImageUrls, setUploadedImageUrls] = useState([])
+  const [selectedImages, setSelectedImages] = useState([]);
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState({});
+  const [uploadedImageUrls, setUploadedImageUrls] = useState([]);
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Extract eventId from URL query or props
+  const queryParams = new URLSearchParams(location.search);
+  const eventId = queryParams.get("eventId") || (onNavigate && location.state?.eventId);
 
   const handleGoBack = () => {
     if (onNavigate) {
-      onNavigate(-1)
+      onNavigate(-1);
     } else {
-      window.history.back()
+      window.history.back();
     }
-  }
+  };
 
   const handleFileSelect = async (files) => {
-    const validFiles = []
-
-    // Validate each file
+    const validFiles = [];
     for (const file of files) {
-      // Validate file type
       if (!file.type.startsWith("image/")) {
         toast.error(`${file.name} is not a valid image file`, {
           position: "top-right",
@@ -44,11 +47,10 @@ const UploadEventGallery = ({ onNavigate, onGalleryUpload, onSkip, onContinue })
             fontFamily: '"Poppins", sans-serif',
             fontSize: "14px",
           },
-        })
-        continue
+        });
+        continue;
       }
 
-      // Validate file size (max 10MB)
       if (file.size > 10 * 1024 * 1024) {
         toast.error(`${file.name} is too large. Maximum size is 10MB`, {
           position: "top-right",
@@ -65,19 +67,18 @@ const UploadEventGallery = ({ onNavigate, onGalleryUpload, onSkip, onContinue })
             fontFamily: '"Poppins", sans-serif',
             fontSize: "14px",
           },
-        })
-        continue
+        });
+        continue;
       }
 
-      validFiles.push(file)
+      validFiles.push(file);
     }
 
-    if (validFiles.length === 0) return
+    if (validFiles.length === 0) return;
 
-    // Create previews and add to selected images
-    const newImages = []
+    const newImages = [];
     for (const file of validFiles) {
-      const reader = new FileReader()
+      const reader = new FileReader();
       const imageData = {
         id: Date.now() + Math.random(),
         file: file,
@@ -85,50 +86,46 @@ const UploadEventGallery = ({ onNavigate, onGalleryUpload, onSkip, onContinue })
         uploaded: false,
         uploading: false,
         url: null,
-      }
+      };
 
       reader.onload = (e) => {
-        imageData.preview = e.target?.result
+        imageData.preview = e.target?.result;
         setSelectedImages((prev) => {
-          const updated = [...prev]
-          const index = updated.findIndex((img) => img.id === imageData.id)
+          const updated = [...prev];
+          const index = updated.findIndex((img) => img.id === imageData.id);
           if (index !== -1) {
-            updated[index] = { ...updated[index], preview: e.target?.result }
+            updated[index] = { ...updated[index], preview: e.target?.result };
           }
-          return updated
-        })
-      }
-      reader.readAsDataURL(file)
+          return updated;
+        });
+      };
+      reader.readAsDataURL(file);
 
-      newImages.push(imageData)
+      newImages.push(imageData);
     }
 
-    setSelectedImages((prev) => [...prev, ...newImages])
-
-    // Upload to backend
-    await uploadImagesToBackend(newImages)
-  }
+    setSelectedImages((prev) => [...prev, ...newImages]);
+    await uploadImagesToBackend(newImages);
+  };
 
   const uploadImagesToBackend = async (images) => {
-    setIsUploading(true)
-
+    setIsUploading(true);
     try {
-      // Get the JWT token from storage
-      const token = localStorage.getItem("token")
-
+      const token = localStorage.getItem("token");
       if (!token) {
-        throw new Error("No authentication token found")
+        throw new Error("No authentication token found");
+      }
+      if (!eventId) {
+        throw new Error("Event ID is missing");
       }
 
-      // Upload each image
       for (const imageData of images) {
-        // Update uploading state
-        setSelectedImages((prev) => prev.map((img) => (img.id === imageData.id ? { ...img, uploading: true } : img)))
+        setSelectedImages((prev) => prev.map((img) => (img.id === imageData.id ? { ...img, uploading: true } : img)));
 
-        // Create FormData for file upload
-        const formData = new FormData()
-        formData.append("eventImage", imageData.file)
-        formData.append("imageType", "gallery")
+        const formData = new FormData();
+        formData.append("eventImage", imageData.file);
+        formData.append("imageType", "gallery");
+        formData.append("eventId", eventId); // Include eventId
 
         try {
           const response = await axios.post("https://genpay-sl25bd.onrender.com/api/events/upload-gallery", formData, {
@@ -137,17 +134,16 @@ const UploadEventGallery = ({ onNavigate, onGalleryUpload, onSkip, onContinue })
               "Content-Type": "multipart/form-data",
             },
             onUploadProgress: (progressEvent) => {
-              const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total)
+              const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
               setUploadProgress((prev) => ({
                 ...prev,
                 [imageData.id]: progress,
-              }))
+              }));
             },
-          })
+          });
 
-          console.log("Image uploaded successfully:", response.data)
+          console.log("Image uploaded successfully:", response.data);
 
-          // Update image as uploaded
           setSelectedImages((prev) =>
             prev.map((img) =>
               img.id === imageData.id
@@ -158,27 +154,14 @@ const UploadEventGallery = ({ onNavigate, onGalleryUpload, onSkip, onContinue })
                     url: response.data.data.imageUrl,
                     uploadId: response.data.data.uploadId,
                   }
-                : img,
-            ),
-          )
+                : img
+            )
+          );
 
-          // Add to uploaded URLs
-          setUploadedImageUrls((prev) => [...prev, response.data.data.imageUrl])
+          setUploadedImageUrls((prev) => [...prev, response.data.data.imageUrl]);
         } catch (error) {
-          console.error("Image upload failed:", error)
-
-          // Update image as failed
-          setSelectedImages((prev) =>
-            prev.map((img) =>
-              img.id === imageData.id ? { ...img, uploading: false, uploaded: false, error: true } : img,
-            ),
-          )
-
-          let errorMessage = `Failed to upload ${imageData.file.name}`
-          if (error.response?.data?.message) {
-            errorMessage = error.response.data.message
-          }
-
+          console.error("Image upload failed:", error);
+          let errorMessage = error.response?.data?.message || `Failed to upload ${imageData.file.name}`;
           toast.error(errorMessage, {
             position: "top-right",
             autoClose: 5000,
@@ -194,14 +177,19 @@ const UploadEventGallery = ({ onNavigate, onGalleryUpload, onSkip, onContinue })
               fontFamily: '"Poppins", sans-serif',
               fontSize: "14px",
             },
-          })
+          });
+
+          setSelectedImages((prev) =>
+            prev.map((img) =>
+              img.id === imageData.id ? { ...img, uploading: false, uploaded: false, error: true } : img
+            )
+          );
         }
       }
 
-      // Call parent callback with uploaded images
       if (onGalleryUpload) {
-        const uploadedImages = selectedImages.filter((img) => img.uploaded)
-        onGalleryUpload(uploadedImages)
+        const uploadedImages = selectedImages.filter((img) => img.uploaded);
+        onGalleryUpload(uploadedImages);
       }
 
       if (images.some((img) => selectedImages.find((selected) => selected.id === img.id)?.uploaded)) {
@@ -220,16 +208,20 @@ const UploadEventGallery = ({ onNavigate, onGalleryUpload, onSkip, onContinue })
             fontFamily: '"Poppins", sans-serif',
             fontSize: "14px",
           },
-        })
+        });
       }
+
+      // Navigate to next step or dashboard
+      setTimeout(() => {
+        if (onNavigate) {
+          onNavigate("/dashboard");
+        } else {
+          navigate("/dashboard");
+        }
+      }, 2000);
     } catch (error) {
-      console.error("Gallery upload failed:", error)
-
-      let errorMessage = "Failed to upload gallery images. Please try again."
-      if (error.message === "No authentication token found") {
-        errorMessage = "Please log in to upload images."
-      }
-
+      console.error("Gallery upload failed:", error);
+      let errorMessage = error.response?.data?.message || "Failed to upload gallery images. Please try again.";
       toast.error(errorMessage, {
         position: "top-right",
         autoClose: 5000,
@@ -245,12 +237,12 @@ const UploadEventGallery = ({ onNavigate, onGalleryUpload, onSkip, onContinue })
           fontFamily: '"Poppins", sans-serif',
           fontSize: "14px",
         },
-      })
+      });
     } finally {
-      setIsUploading(false)
-      setUploadProgress({})
+      setIsUploading(false);
+      setUploadProgress({});
     }
-  }
+  };
 
   const handleFileInputChange = (e) => {
     const files = Array.from(e.target.files || [])

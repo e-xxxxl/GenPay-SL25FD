@@ -1,31 +1,36 @@
 "use client"
 
-import { useState, useRef } from "react"
-import { ArrowLeft, Upload, ImageIcon } from "lucide-react"
-import { toast, ToastContainer } from "react-toastify"
-import "react-toastify/dist/ReactToastify.css"
-import axios from "axios"
-import { useNavigate } from "react-router-dom"
+import { useState, useRef } from "react";
+import { ArrowLeft, Upload, ImageIcon } from "lucide-react";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import axios from "axios";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const UploadEventHeader = ({ onNavigate, onImageUpload, onSkip, onContinue }) => {
-  const [selectedImage, setSelectedImage] = useState(null)
-  const [imagePreview, setImagePreview] = useState(null)
-  const [isDragging, setIsDragging] = useState(false)
-  const fileInputRef = useRef(null)
-  const [isUploading, setIsUploading] = useState(false)
-  const [uploadedImageUrl, setUploadedImageUrl] = useState(null)
-  const [uploadProgress, setUploadProgress] = useState(0)
-const navigate = useNavigate()
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadedImageUrl, setUploadedImageUrl] = useState(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Extract eventId from URL query or props
+  const queryParams = new URLSearchParams(location.search);
+  const eventId = queryParams.get("eventId") || (onNavigate && location.state?.eventId);
+
   const handleGoBack = () => {
     if (onNavigate) {
-      onNavigate(-1)
+      onNavigate(-1);
     } else {
-      window.history.back()
+      window.history.back();
     }
-  }
+  };
 
   const handleFileSelect = async (file) => {
-    // Validate file type
     if (!file.type.startsWith("image/")) {
       toast.error("Please select a valid image file", {
         position: "top-right",
@@ -42,11 +47,10 @@ const navigate = useNavigate()
           fontFamily: '"Poppins", sans-serif',
           fontSize: "14px",
         },
-      })
-      return
+      });
+      return;
     }
 
-    // Validate file size (max 10MB)
     if (file.size > 10 * 1024 * 1024) {
       toast.error("Image size should be less than 10MB", {
         position: "top-right",
@@ -63,64 +67,60 @@ const navigate = useNavigate()
           fontFamily: '"Poppins", sans-serif',
           fontSize: "14px",
         },
-      })
-      return
+      });
+      return;
     }
 
-    setSelectedImage(file)
+    setSelectedImage(file);
 
-    // Create preview
-    const reader = new FileReader()
+    const reader = new FileReader();
     reader.onload = (e) => {
-      setImagePreview(e.target?.result)
-    }
-    reader.readAsDataURL(file)
+      setImagePreview(e.target?.result);
+    };
+    reader.readAsDataURL(file);
 
-    // Upload to backend
-    await uploadImageToBackend(file)
-  }
+    await uploadImageToBackend(file);
+  };
 
   const uploadImageToBackend = async (file) => {
-    setIsUploading(true)
-    setUploadProgress(0)
+    setIsUploading(true);
+    setUploadProgress(0);
 
     try {
-      // Get the JWT token from storage
-      const token = localStorage.getItem("token")
-
+      const token = localStorage.getItem("token");
       if (!token) {
-        throw new Error("No authentication token found")
+        throw new Error("No authentication token found");
+      }
+      if (!eventId) {
+        throw new Error("Event ID is missing");
       }
 
-      // Create FormData for file upload
-      const formData = new FormData()
-      formData.append("eventImage", file)
-      formData.append("imageType", "header") // Specify this is a header image
+      const formData = new FormData();
+      formData.append("eventImage", file);
+      formData.append("imageType", "header");
+      formData.append("eventId", eventId); // Include eventId
 
-      // Upload to backend
       const response = await axios.post("https://genpay-sl25bd.onrender.com/api/events/upload-image", formData, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data",
         },
         onUploadProgress: (progressEvent) => {
-          const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total)
-          setUploadProgress(progress)
+          const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          setUploadProgress(progress);
         },
-      })
+      });
 
-      console.log("Image uploaded successfully:", response.data)
-      navigate('/create-event/upload-event-gallery')
-      // Store the uploaded image URL
-      setUploadedImageUrl(response.data.data.imageUrl)
+      console.log("Image uploaded successfully:", response.data);
+      setUploadedImageUrl(response.data.data.imageUrl);
 
-      // Call parent callback with the uploaded image data
       if (onImageUpload) {
         onImageUpload({
           file: file,
           url: response.data.data.imageUrl,
           uploadId: response.data.data.uploadId,
-        })
+          eventId,
+        });
       }
 
       toast.success("Image uploaded successfully!", {
@@ -138,20 +138,19 @@ const navigate = useNavigate()
           fontFamily: '"Poppins", sans-serif',
           fontSize: "14px",
         },
-      })
+      });
+
+      // Navigate to gallery upload with eventId
+      setTimeout(() => {
+        if (onNavigate) {
+          onNavigate("/create-event/upload-event-gallery", { eventId });
+        } else {
+          navigate(`/create-event/upload-event-gallery?eventId=${eventId}`);
+        }
+      }, 2000);
     } catch (error) {
-      console.error("Image upload failed:", error)
-
-      let errorMessage = "Failed to upload image. Please try again."
-
-      if (error.response) {
-        errorMessage = error.response.data.message || errorMessage
-      } else if (error.message === "No authentication token found") {
-        errorMessage = "Please log in to upload images."
-      } else if (error.message) {
-        errorMessage = "Connection error. Please check your network."
-      }
-
+      console.error("Image upload failed:", error);
+      let errorMessage = error.response?.data?.message || "Failed to upload image. Please try again.";
       toast.error(errorMessage, {
         position: "top-right",
         autoClose: 5000,
@@ -167,17 +166,17 @@ const navigate = useNavigate()
           fontFamily: '"Poppins", sans-serif',
           fontSize: "14px",
         },
-      })
+      });
 
-      // Reset states on error
-      setSelectedImage(null)
-      setImagePreview(null)
-      setUploadedImageUrl(null)
+      setSelectedImage(null);
+      setImagePreview(null);
+      setUploadedImageUrl(null);
     } finally {
-      setIsUploading(false)
-      setUploadProgress(0)
+      setIsUploading(false);
+      setUploadProgress(0);
     }
-  }
+  };
+
 
   const handleFileInputChange = (e) => {
     const file = e.target.files?.[0]
