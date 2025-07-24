@@ -212,14 +212,14 @@ const UploadEventGallery = ({ onNavigate, onGalleryUpload, onSkip, onContinue })
       }
 
       // Navigate to next step or dashboard
-      setTimeout(() => {
-        if (onNavigate) {
-          onNavigate("/dashboard");
-        } else {
-          navigate("/dashboard");
-        }
-      }, 2000);
-    } catch (error) {
+    //   setTimeout(() => {
+    //     if (onNavigate) {
+    //       onNavigate("/dashboard");
+    //     } else {
+    //       navigate("/dashboard");
+    //     }
+    //   }, 2000);
+    // } catch (error) {
       console.error("Gallery upload failed:", error);
       let errorMessage = error.response?.data?.message || "Failed to upload gallery images. Please try again.";
       toast.error(errorMessage, {
