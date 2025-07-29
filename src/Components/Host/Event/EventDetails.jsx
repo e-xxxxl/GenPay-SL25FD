@@ -101,7 +101,7 @@ const EventDetails = () => {
           throw new Error("No authentication token found")
         }
 
-        const response = await fetch(`http://localhost:5000/api/events/${id}`, {
+        const response = await fetch(`https://genpay-sl25bd.onrender.com/api/events/${id}`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -241,7 +241,7 @@ const EventDetails = () => {
         tickets: formData.ticketTiers,
       }
 
-      const response = await fetch(`http://localhost:5000/api/events/${id}`, {
+      const response = await fetch(`https://genpay-sl25bd.onrender.com/api/events/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
