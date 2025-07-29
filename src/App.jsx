@@ -20,6 +20,7 @@ import IssuesPage from "./Components/Pages/IssuesPage";
 import CreateEventPage from "./Components/Pages/CreateEventPage";
 import UploadEventHeaderPage from "./Components/Pages/UploadEventHeaderPage";
 import UploadEventGalleryPage from "./Components/Pages/UploadEventGalleryPage";
+import EventDetailsPage from "./Components/Pages/EventDetailsPage";
 
 function App() {
   return (
@@ -40,6 +41,7 @@ function App() {
         <Route path="/create-event" element={<CreateEventPage/>} />
         <Route path="/create-event/upload-event-image" element={<UploadEventHeaderPage/>} />
         <Route path="/create-event/upload-event-gallery" element={<UploadEventGalleryPage/>} />
+         <Route path="/event-details/:id" element={<EventDetailsPage/>} />
       </Routes>
     </>
   );

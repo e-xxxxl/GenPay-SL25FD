@@ -297,7 +297,9 @@ const UploadEventGallery = ({ onNavigate, onGalleryUpload, onSkip, onContinue })
         images: selectedImages,
         uploadedUrls: uploadedImageUrls,
         hasImages: selectedImages.length > 0,
+        
       })
+      navigate("/dashboard");
     } else {
       console.log("Continuing with gallery:", {
         imageCount: selectedImages.length,
