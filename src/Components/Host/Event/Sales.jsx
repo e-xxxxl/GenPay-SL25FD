@@ -1,31 +1,9 @@
 // Components/Host/Event/Sales.jsx
-"use client"
+"use client";
 
-import { useEffect, useMemo, useState, useCallback, Component, useRef } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Info, ScanLine } from "lucide-react";
-import { BrowserQRCodeReader, NotFoundException } from "@zxing/library";
-
-// Error Boundary Component
-class ErrorBoundary extends Component {
-  state = { hasError: false, errorMessage: "" };
-
-  static getDerivedStateFromError(error) {
-    return { hasError: true, errorMessage: error.message };
-  }
-
-  render() {
-    if (this.state.hasError) {
-      return (
-        <div className="text-red-500 p-4">
-          <p>QR Scanner Error: {this.state.errorMessage}</p>
-          <p>Please try again or check the console for details.</p>
-        </div>
-      );
-    }
-    return this.props.children;
-  }
-}
+import { ArrowLeft, Info, ScanLine, CheckCircle } from "lucide-react";
 
 // Custom debounce function
 function debounce(func, wait) {
@@ -67,8 +45,6 @@ function formatTime(dt) {
 const Sales = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [isMobile, setIsMobile] = useState(false);
-  const [showScanner, setShowScanner] = useState(false);
   const [searchInput, setSearchInput] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -77,155 +53,115 @@ const Sales = () => {
   const [guests, setGuests] = useState([]);
   const [payouts, setPayouts] = useState([]);
   const [error, setError] = useState("");
-  const [cameraAvailable, setCameraAvailable] = useState(true);
-  const videoRef = useRef(null);
-  const codeReader = useRef(null);
+  const [searchLoading, setSearchLoading] = useState(false);
 
-  useEffect(() => {
-    const userAgent = navigator.userAgent.toLowerCase();
-    const mobile = /ipad|iphone|android/i.test(userAgent);
-    setIsMobile(mobile);
-    console.log("Device detected as mobile:", mobile);
-
-    // Check for camera availability
-    navigator.mediaDevices.enumerateDevices()
-      .then(devices => {
-        const hasCamera = devices.some(device => device.kind === 'videoinput');
-        setCameraAvailable(hasCamera);
-        console.log("Available cameras:", devices.filter(d => d.kind === 'videoinput'));
-        if (!hasCamera) {
-          setError("No camera detected. QR scanning is unavailable.");
-        }
-      })
-      .catch(err => {
-        console.error("Error checking camera availability:", err);
-        setCameraAvailable(false);
-        setError("Failed to access camera. Please check permissions or device settings.");
-      });
-  }, []);
-
-  useEffect(() => {
-    if (showScanner && cameraAvailable) {
-      codeReader.current = new BrowserQRCodeReader();
-      console.log("Initializing QR scanner...");
-      codeReader.current
-        .decodeFromVideoDevice(null, videoRef.current, (result, err) => {
-          console.log("decodeFromVideoDevice callback triggered", { result, err });
-          if (result) {
-            console.log("QR code raw data:", result.getText());
-            handleScan({ text: result.getText() });
-          }
-          if (err && !(err instanceof NotFoundException)) {
-            console.error("ZXing QR Scanner error:", err);
-            setError(`Scanner error: ${err.message}`);
-            setShowScanner(false);
-          }
-        })
-        .catch(err => {
-          console.error("ZXing initialization error:", err);
-          setError(`Failed to initialize scanner: ${err.message}`);
-          setShowScanner(false);
-        });
-
-      return () => {
-        if (codeReader.current) {
-          codeReader.current.reset();
-          console.log("QR scanner reset");
-        }
-      };
-    }
-  }, [showScanner, cameraAvailable]);
-
-  const handleScan = async (data) => {
-    console.log("handleScan called with data:", data);
-    if (!data || !data.text) {
-      console.warn("No valid QR code data received:", data);
-      setError("No valid QR code detected. Please try again.");
-      setShowScanner(false);
-      return;
-    }
-
+  const fetchAll = useCallback(async () => {
+    let cancelled = false;
     try {
+      setLoading(true);
+      setError("");
+
       const token = localStorage.getItem("token");
       if (!token) {
         setError("Authentication token missing. Please log in.");
-        setShowScanner(false);
         return;
       }
+      const headers = {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      };
 
-      let qrCode = data.text;
-      console.log("Raw QR code data:", qrCode);
-      // Parse JSON if QR code is JSON-formatted
-      try {
-        const parsed = JSON.parse(qrCode);
-        qrCode = parsed.ticketId || qrCode;
-        console.log("Parsed QR code ticketId:", qrCode);
-      } catch (e) {
-        console.warn("QR code is not JSON, using raw text:", qrCode);
+      console.log("Fetching data for event ID:", id);
+      const [eventRes, checkinRes, ticketBuyersRes, payoutsRes] = await Promise.allSettled([
+        fetch(`http://localhost:5000/api/events/${id}`, { headers }),
+        fetch(`http://localhost:5000/api/events/${id}/checkins`, { headers }),
+        fetch(`http://localhost:5000/api/events/${id}/ticket-buyers`, { headers }),
+        fetch(`http://localhost:5000/api/events/${id}/payouts`, { headers }),
+      ]);
+
+      if (cancelled) return;
+
+      if (eventRes.status === "fulfilled" && eventRes.value.ok) {
+        const data = await eventRes.value.json();
+        console.log("Event response:", data);
+        const ev = data?.data?.event || data?.event || {};
+        setEventTitle(ev.eventName || ev.title || "Event");
+      } else {
+        console.warn("Event fetch failed, status:", eventRes.status, eventRes.value?.status);
+        setEventTitle("X Republik");
       }
 
-      console.log("Sending QR code to backend:", qrCode);
-      const response = await fetch(`https://genpay-sl25bd-1.onrender.com/api/events/scan-ticket`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ qrCode }),
-      });
-
-      const result = await response.json();
-      console.log("Scan response:", result);
-      if (result.status === 'success') {
-        setSearchResults([{
-          ...result.data.ticket,
-          status: 'valid',
-          color: 'green',
-        }]);
-        fetchAll();
-      } else if (result.status === 'fail' && result.message.includes('already been used')) {
-        setSearchResults([{
-          ...result.data.ticket,
-          status: 'used',
-          color: 'red',
-        }]);
+      if (checkinRes.status === "fulfilled" && checkinRes.value.ok) {
+        const data = await checkinRes.value.json();
+        console.log("Checkins response:", data);
+        const rows = data?.data?.checkins || data?.checkins || [];
+        setCheckins(rows);
       } else {
-        setError(result.message || "Failed to scan ticket");
+        console.warn("Checkins fetch failed, status:", checkinRes.status, checkinRes.value?.status);
+        setCheckins([]);
+      }
+
+      if (ticketBuyersRes.status === "fulfilled" && ticketBuyersRes.value.ok) {
+        const data = await ticketBuyersRes.value.json();
+        console.log("Ticket buyers response:", data);
+        const rows = data?.data?.guests || data?.guests || [];
+        setGuests(rows);
+      } else {
+        console.warn("Ticket buyers fetch failed, status:", ticketBuyersRes.status, ticketBuyersRes.value?.status);
+        setGuests([]);
+      }
+
+      if (payoutsRes.status === "fulfilled" && payoutsRes.value.ok) {
+        const data = await payoutsRes.value.json();
+        console.log("Payouts response:", data);
+        const rows = data?.data?.payouts || data?.payouts || [];
+        setPayouts(rows);
+      } else {
+        console.warn("Payouts fetch failed, status:", payoutsRes.status, payoutsRes.value?.status);
+        setPayouts([]);
+        setError("Payouts data unavailable. Please check the backend configuration.");
       }
     } catch (err) {
-      console.error("Scan error:", err);
-      setError('Failed to scan ticket: ' + err.message);
+      console.error("Fetch error:", err);
+      if (!cancelled) setError(err.message || "Failed to load sales data.");
+    } finally {
+      if (!cancelled) setLoading(false);
     }
-    setShowScanner(false);
-  };
+    return () => {
+      cancelled = true;
+    };
+  }, [id]);
 
   const debouncedSearch = useCallback(
     debounce(async (query) => {
-      if (!query) {
+      if (!query || query.trim().length < 3) {
         setSearchResults([]);
         setError("");
         return;
       }
       try {
+        setSearchLoading(true);
         const token = localStorage.getItem("token");
         if (!token) {
           setError("Authentication token missing. Please log in.");
+          setSearchResults([]);
           return;
         }
-        console.log("Searching for:", query, "Event ID:", id);
-        const response = await fetch(`https://genpay-sl25bd-1.onrender.com/api/events/${id}/search-ticket`, {
-          method: 'POST',
+        const cleanQuery = query.trim();
+        console.log("Searching for:", cleanQuery, "Event ID:", id);
+        const response = await fetch(`http://localhost:5000/api/events/${id}/search-ticket`, {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({ search: query }),
+          body: JSON.stringify({ search: cleanQuery }),
         });
 
         const result = await response.json();
         console.log("Search response:", result);
-        if (result.status === 'success') {
-          setSearchResults(result.data.tickets || []);
+        if (result.status === "success" && result.data.tickets?.length > 0) {
+          setSearchResults(result.data.tickets);
           setError("");
           fetchAll();
         } else {
@@ -234,12 +170,55 @@ const Sales = () => {
         }
       } catch (err) {
         console.error("Search error:", err);
-        setError('Failed to search ticket: ' + err.message);
+        setError("Failed to search ticket: " + err.message);
         setSearchResults([]);
+      } finally {
+        setSearchLoading(false);
       }
     }, 300),
-    [id]
+    [id, fetchAll]
   );
+
+  const handleCheckIn = useCallback(async (ticketId) => {
+    try {
+      setSearchLoading(true);
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setError("Authentication token missing. Please log in.");
+        return;
+      }
+
+      console.log("Checking in ticket:", ticketId, "for event:", id);
+      const response = await fetch(`http://localhost:5000/api/events/${id}/check-in-ticket`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ ticketId }),
+      });
+
+      const result = await response.json();
+      console.log("Check-in response:", result);
+      if (result.status === "success") {
+        setError("");
+        // Update search results to reflect checked-in status
+        setSearchResults((prev) =>
+          prev.map((ticket) =>
+            ticket.id === ticketId ? { ...ticket, status: "used", usedAt: result.data.ticket.usedAt } : ticket
+          )
+        );
+        fetchAll(); // Refresh guest list and check-ins
+      } else {
+        setError(result.message || "Failed to check in ticket");
+      }
+    } catch (err) {
+      console.error("Check-in error:", err);
+      setError("Failed to check in ticket: " + err.message);
+    } finally {
+      setSearchLoading(false);
+    }
+  }, [id, fetchAll]);
 
   useEffect(() => {
     debouncedSearch(searchInput);
@@ -247,86 +226,8 @@ const Sales = () => {
   }, [searchInput, debouncedSearch]);
 
   useEffect(() => {
-    let cancelled = false;
-
-    async function fetchAll() {
-      try {
-        setLoading(true);
-        setError("");
-
-        const token = localStorage.getItem("token");
-        if (!token) {
-          setError("Authentication token missing. Please log in.");
-          return;
-        }
-        const headers = {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        };
-
-        console.log("Fetching data for event ID:", id);
-        const [eventRes, checkinRes, ticketBuyersRes, payoutsRes] = await Promise.allSettled([
-          fetch(`https://genpay-sl25bd-1.onrender.com/api/events/${id}`, { headers }),
-          fetch(`https://genpay-sl25bd-1.onrender.com/api/events/${id}/checkins`, { headers }),
-          fetch(`https://genpay-sl25bd-1.onrender.com/api/events/${id}/ticket-buyers`, { headers }),
-          fetch(`https://genpay-sl25bd-1.onrender.com/api/events/${id}/payouts`, { headers }),
-        ]);
-
-        if (cancelled) return;
-
-        if (eventRes.status === "fulfilled" && eventRes.value.ok) {
-          const data = await eventRes.value.json();
-          console.log("Event response:", data);
-          const ev = data?.data?.event || data?.event || {};
-          setEventTitle(ev.eventName || ev.title || "Event");
-        } else {
-          console.warn("Event fetch failed, status:", eventRes.status, eventRes.value?.status);
-          setEventTitle("X Republik");
-        }
-
-        if (checkinRes.status === "fulfilled" && checkinRes.value.ok) {
-          const data = await checkinRes.value.json();
-          console.log("Checkins response:", data);
-          const rows = data?.data?.checkins || data?.checkins || [];
-          setCheckins(rows);
-        } else {
-          console.warn("Checkins fetch failed, status:", checkinRes.status, checkinRes.value?.status);
-          setCheckins([]);
-        }
-
-        if (ticketBuyersRes.status === "fulfilled" && ticketBuyersRes.value.ok) {
-          const data = await ticketBuyersRes.value.json();
-          console.log("Ticket buyers response:", data);
-          const rows = data?.data?.guests || data?.guests || [];
-          setGuests(rows);
-        } else {
-          console.warn("Ticket buyers fetch failed, status:", ticketBuyersRes.status, ticketBuyersRes.value?.status);
-          setGuests([]);
-        }
-
-        if (payoutsRes.status === "fulfilled" && payoutsRes.value.ok) {
-          const data = await payoutsRes.value.json();
-          console.log("Payouts response:", data);
-          const rows = data?.data?.payouts || data?.payouts || [];
-          setPayouts(rows);
-        } else {
-          console.warn("Payouts fetch failed, status:", payoutsRes.status, payoutsRes.value?.status);
-          setPayouts([]);
-          setError("Payouts data unavailable. Please check the backend configuration.");
-        }
-      } catch (err) {
-        console.error("Fetch error:", err);
-        if (!cancelled) setError(err.message || "Failed to load sales data.");
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    }
-
     fetchAll();
-    return () => {
-      cancelled = true;
-    };
-  }, [id]);
+  }, [fetchAll]);
 
   const totalGuests = guests.length;
   const checkedInCount = useMemo(() => guests.filter((g) => g.checkedIn).length, [guests]);
@@ -380,63 +281,51 @@ const Sales = () => {
 
         <div className="mb-6">
           <button
-            onClick={() => cameraAvailable && setShowScanner(!showScanner)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-full transition-colors ${
-              cameraAvailable ? 'bg-white/10 hover:bg-white/20' : 'bg-gray-500 cursor-not-allowed'
-            }`}
-            disabled={!cameraAvailable}
+            className="flex items-center gap-2 px-4 py-2 rounded-full bg-gray-500 cursor-not-allowed"
+            disabled
+            title="QR Scanning Feature Coming Soon"
           >
             <ScanLine className="h-5 w-5" />
-            {showScanner ? 'Close Scanner' : 'Scan QR Code'}
+            Scan QR Code (Coming Soon)
           </button>
-          {!isMobile && (
-            <p className="text-sm text-gray-400 mt-2">
-              Note: QR scanning requires a camera. Ensure you have a webcam and permissions enabled.
-            </p>
-          )}
-          {!cameraAvailable && (
-            <p className="text-sm text-red-500 mt-2">
-              Camera unavailable. QR scanning is disabled.
-            </p>
-          )}
+          <p className="text-sm text-gray-400 mt-2">
+            QR scanning is not available yet. Use the search below to find tickets by ID or email.
+          </p>
         </div>
-
-        {showScanner && (
-          <ErrorBoundary>
-            <div className="mb-6">
-              <video
-                ref={videoRef}
-                style={{ width: '100%', maxWidth: '400px' }}
-                muted
-                playsInline
-              />
-              <p className="text-sm text-gray-400 mt-2">
-                Ensure the QR code is well-lit and in focus.
-              </p>
-            </div>
-          </ErrorBoundary>
-        )}
 
         <div className="mb-6 relative">
           <input
             type="text"
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
-            placeholder="Search by ticket ID or email"
+            placeholder="Search by ticket ID or email (minimum 3 characters)"
             className="w-full px-4 py-2 rounded-lg bg-white/5 text-white"
           />
+          {searchLoading && <p className="text-gray-400 text-sm mt-2">Searching...</p>}
           {searchResults.length > 0 && (
             <div className="absolute z-10 w-full mt-2 rounded-lg bg-white/10 backdrop-blur-sm max-h-60 overflow-y-auto">
               {searchResults.map((result, idx) => (
                 <div
                   key={idx}
                   className="p-4 border-b border-white/10 last:border-none"
-                  style={{ background: result.status === 'valid' ? 'rgba(34, 197, 94, 0.2)' : 'rgba(239, 68, 68, 0.2)' }}
+                  style={{ background: result.status === "valid" ? "rgba(34, 197, 94, 0.2)" : "rgba(239, 68, 68, 0.2)" }}
                 >
                   <p className="font-semibold">Ticket Status: {result.status.toUpperCase()}</p>
                   <p>Owner: {result.owner.firstName} {result.owner.lastName}</p>
                   <p>Email: {result.owner.email}</p>
                   <p>Ticket ID: {result.id}</p>
+                  {result.owner.phone && <p>Phone: {result.owner.phone}</p>}
+                  {result.owner.location && <p>Location: {result.owner.location}</p>}
+                  {result.status === "valid" && (
+                    <button
+                      onClick={() => handleCheckIn(result.id)}
+                      className="mt-2 flex items-center gap-2 px-3 py-1 rounded-full bg-green-600 hover:bg-green-700 text-white text-sm"
+                      disabled={searchLoading}
+                    >
+                      <CheckCircle className="h-4 w-4" />
+                      Check In
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
@@ -471,7 +360,7 @@ const Sales = () => {
                     <td className="px-4 py-3">
                       <span
                         className={`inline-flex items-center rounded-md px-3 py-1 text-xs text-gray-200 ${
-                          row.status === 'Used' ? 'bg-red-500' : 'bg-green-500'
+                          row.status === "Used" ? "bg-red-500" : "bg-green-500"
                         }`}
                       >
                         {row.status || "Used"}
@@ -522,10 +411,10 @@ const Sales = () => {
                     <td className="px-4 py-3">
                       <span
                         className={`inline-flex items-center rounded-md px-3 py-1 text-xs text-gray-200 ${
-                          guest.checkedIn ? 'bg-green-500' : 'bg-red-500'
+                          guest.checkedIn ? "bg-green-500" : "bg-red-500"
                         }`}
                       >
-                        {guest.checkedIn ? 'Checked In' : 'Not Checked In'}
+                        {guest.checkedIn ? "Checked In" : "Not Checked In"}
                       </span>
                     </td>
                   </tr>
