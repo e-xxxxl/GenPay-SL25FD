@@ -4,7 +4,8 @@ import viteLogo from "/vite.svg";
 import "./App.css";
 import LandingPage from "./Components/Pages/LandingPage";
 
-import { Route, Routes } from "react-router-dom";
+
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import SignUpPage from "./Components/Pages/SignUpPage";
 import VerifyEmailPage from "./Components/Pages/VerifyEmailPage";
 import VerifiedPage from "./Components/Pages/VerifiedPage";
@@ -21,6 +22,16 @@ import CreateEventPage from "./Components/Pages/CreateEventPage";
 import UploadEventHeaderPage from "./Components/Pages/UploadEventHeaderPage";
 import UploadEventGalleryPage from "./Components/Pages/UploadEventGalleryPage";
 import EventDetailsPage from "./Components/Pages/EventDetailsPage";
+import AddTicketPage from "./Components/Pages/AddTicketPage";
+import TicketListPage from "./Components/Pages/TicketListPage";
+import EditTicketPage from "./Components/Pages/EditTicketPage";
+import ExplorePage from "./Components/Pages/ExplorePage";
+import ExploreEventDetailsPage from "./Components/Pages/ExploreEventDetailsPage";
+import BuyTicketPage from "./Components/Pages/BuyTicketPage";
+import CheckoutPage from "./Components/Pages/CheckoutPage";
+import PaymentPage from "./Components/Pages/PaymentPage";
+import Success from "./Components/Explore/Tickets/Success";
+import Sales from "./Components/Host/Event/Sales";
 
 function App() {
   return (
@@ -42,6 +53,16 @@ function App() {
         <Route path="/create-event/upload-event-image" element={<UploadEventHeaderPage/>} />
         <Route path="/create-event/upload-event-gallery" element={<UploadEventGalleryPage/>} />
          <Route path="/event-details/:id" element={<EventDetailsPage/>} />
+        <Route path="/add-ticket/:id" element={<ProtectedRoute><AddTicketPage/></ProtectedRoute>} />
+        <Route path="/ticket-list/:id" element={<ProtectedRoute><TicketListPage/></ProtectedRoute>} />
+        <Route path="/sales/:id" element={<ProtectedRoute><Sales/></ProtectedRoute>} />
+        <Route path="/edit-ticket/:id/:ticketId" element={<EditTicketPage />} />
+         <Route path="/explore" element={<ExplorePage />} />
+         <Route path="/explore/:eventName" element={<ExploreEventDetailsPage />} />
+        <Route path="/buy-ticket/:eventId" element={<BuyTicketPage/>} />
+        <Route path="/checkout/:eventId" element={<CheckoutPage/>} />
+        <Route path="/checkout/payment" element={<PaymentPage/>} />
+        <Route path="/checkout/success" element={<Success/>} />
       </Routes>
     </>
   );

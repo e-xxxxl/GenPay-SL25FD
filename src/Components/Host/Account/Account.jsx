@@ -33,7 +33,7 @@ const Account = () => {
           throw new Error("No authentication token found")
         }
         // Fetch user profile data
-        const userResponse = await axios.get("https://genpay-sl25bd.onrender.com/api/auth/me", {
+        const userResponse = await axios.get("http://localhost:5000/api/auth/me", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -41,7 +41,7 @@ const Account = () => {
         setUser(userResponse.data.data.user)
         // Fetch payout information
         try {
-          const payoutResponse = await axios.get("https://genpay-sl25bd.onrender.com/api/user/payout-info", {
+          const payoutResponse = await axios.get("http://localhost:5000/api/user/payout-info", {
             headers: {
               Authorization: `Bearer ${token}`,
             },

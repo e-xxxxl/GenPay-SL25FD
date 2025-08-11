@@ -468,7 +468,7 @@ const Signup = () => {
     try {
       // Replace with your actual API endpoint
       // http://localhost:5000/api/auth/signup
-      const response = await axios.post("https://genpay-sl25bd.onrender.com/api/auth/signup", formData, {
+      const response = await axios.post("http://localhost:5000/api/auth/signup", formData, {
         headers: {
           "Content-Type": "application/json",
         },

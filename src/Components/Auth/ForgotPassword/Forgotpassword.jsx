@@ -42,7 +42,7 @@ const Forgotpassword = ({ onNavigate }) => {
     try {
       // Replace with your actual API endpoint
       const response = await axios.post(
-        "https://genpay-sl25bd.onrender.com/api/auth/forgot-password",
+        "http://localhost:5000/api/auth/forgot-password",
         {
           email: email.trim(),
         },

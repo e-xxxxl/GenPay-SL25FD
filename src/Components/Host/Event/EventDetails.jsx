@@ -1,4 +1,4 @@
-"use client"
+{"use client"}
 
 import { useState, useEffect, useRef } from "react"
 import { useParams, useNavigate } from "react-router-dom"
@@ -7,7 +7,6 @@ import "react-toastify/dist/ReactToastify.css"
 import {
   ArrowLeft,
   Save,
-  Plus,
   Upload,
   X,
   Calendar,
@@ -42,6 +41,9 @@ const EventDetails = () => {
   const [error, setError] = useState(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [dateTimeError, setDateTimeError] = useState("")
+  const [headerImage, setHeaderImage] = useState(null)
+  const [galleryImages, setGalleryImages] = useState([])
+  const [activeTab, setActiveTab] = useState("Event")
 
   const [formData, setFormData] = useState({
     eventName: "",
@@ -62,29 +64,19 @@ const EventDetails = () => {
     ticketTiers: [],
   })
 
-  const [newTicketTier, setNewTicketTier] = useState({
-    name: "",
-    price: "",
-    quantity: "",
-  })
-
-  const [errors, setErrors] = useState({})
-  const [eventImages, setEventImages] = useState([])
-  const [showTicketForm, setShowTicketForm] = useState(false)
-
   const startDateRef = useRef(null)
   const startTimeRef = useRef(null)
   const endDateRef = useRef(null)
   const endTimeRef = useRef(null)
+  const headerFileInputRef = useRef(null)
+  const galleryFileInputRef = useRef(null)
 
-  // Format date for input (YYYY-MM-DD)
   const formatDateForInput = (date) => {
     if (!date) return ""
     const d = new Date(date)
     return d.toISOString().split("T")[0]
   }
 
-  // Format time for input (HH:MM)
   const formatTimeForInput = (date) => {
     if (!date) return ""
     const d = new Date(date)
@@ -97,12 +89,9 @@ const EventDetails = () => {
         setLoading(true)
         setError(null)
         const token = localStorage.getItem("token")
-        if (!token) {
-          throw new Error("No authentication token found")
-        }
+        if (!token) throw new Error("No authentication token found")
 
-        const response = await fetch(`https://genpay-sl25bd.onrender.com/api/events/${id}`, {
-          method: "GET",
+        const response = await fetch(`http://localhost:5000/api/events/${id}`, {
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
@@ -115,21 +104,20 @@ const EventDetails = () => {
         }
 
         const data = await response.json()
-        if (data.status !== "success") {
-          throw new Error(data.message || "Failed to fetch event")
-        }
+        if (data.status !== "success") throw new Error(data.message || "Failed to fetch event")
 
         const eventData = data.data.event
         setEvent(eventData)
+        setHeaderImage(eventData.headerImage || null)
+        setGalleryImages(eventData.images || [])
 
-        // Parse dates
         const startDateTime = new Date(eventData.startDateTime)
         const endDateTime = new Date(eventData.endDateTime)
 
         setFormData({
           eventName: eventData.eventName || "",
           eventDescription: eventData.eventDescription || "",
-          eventLocation: eventData.eventLocation?.venue || eventData.eventLocation || "",
+          eventLocation: eventData.eventLocation?.venue || "",
           eventLocationTips: eventData.eventLocation?.locationTips || "",
           eventUrl: eventData.eventUrl || "",
           eventCategory: eventData.eventCategory || "",
@@ -144,13 +132,7 @@ const EventDetails = () => {
           websiteUrl: eventData.socialLinks?.website || "",
           ticketTiers: eventData.tickets || [],
         })
-
-        // Set event images if available
-        if (eventData.images) {
-          setEventImages(eventData.images)
-        }
       } catch (err) {
-        console.error("Error fetching event:", err)
         setError(err.message)
         if (err.message.includes("authentication") || err.message.includes("401") || err.message.includes("403")) {
           navigate("/login")
@@ -163,19 +145,13 @@ const EventDetails = () => {
     fetchEvent()
   }, [id, navigate])
 
-  // Handle input changes
   const handleInputChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
-    if (errors[field]) {
-      setErrors((prev) => ({ ...prev, [field]: "" }))
-    }
-    // Clear dateTimeError when user changes date/time fields
     if (["startDate", "startTime", "endDate", "endTime"].includes(field)) {
       setDateTimeError("")
     }
   }
 
-  // Validate date and time
   useEffect(() => {
     if (formData.startDate && formData.endDate && formData.startTime && formData.endTime) {
       const startDateTime = new Date(`${formData.startDate}T${formData.startTime}`)
@@ -196,38 +172,136 @@ const EventDetails = () => {
     }
   }, [formData.startDate, formData.startTime, formData.endDate, formData.endTime])
 
-  const handleAddTicketTier = () => {
-    if (newTicketTier.name && newTicketTier.price && newTicketTier.quantity) {
-      setFormData((prev) => ({
-        ...prev,
-        ticketTiers: [...prev.ticketTiers, { ...newTicketTier, id: Date.now() }],
-      }))
-      setNewTicketTier({ name: "", price: "", quantity: "" })
-      setShowTicketForm(false)
+  const handleImageUpload = async (e, imageType) => {
+    const file = e.target.files[0]
+    if (!file) return
+
+    try {
+      setIsSubmitting(true)
+      const token = localStorage.getItem("token")
+      if (!token) throw new Error("No authentication token found")
+
+      const formData = new FormData()
+      formData.append("eventImage", file)
+      formData.append("imageType", imageType)
+      formData.append("eventId", id)
+
+      const endpoint = imageType === "header" ? "/upload-image" : "/upload-gallery"
+      const response = await fetch(`http://localhost:5000/api/events${endpoint}`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`)
+      }
+
+      const data = await response.json()
+      if (data.status !== "success") throw new Error(data.message || "Failed to upload image")
+
+      if (imageType === "header") {
+        setHeaderImage(data.data.imageUrl)
+      } else {
+        setGalleryImages((prev) => [...prev, data.data.imageUrl])
+      }
+
+      toast.success("Image uploaded successfully!")
+    } catch (err) {
+      toast.error(err.message || "Failed to upload image")
+    } finally {
+      setIsSubmitting(false)
+      if (imageType === "header" && headerFileInputRef.current) {
+        headerFileInputRef.current.value = ""
+      } else if (imageType === "gallery" && galleryFileInputRef.current) {
+        galleryFileInputRef.current.value = ""
+      }
     }
   }
 
-  const handleRemoveTicketTier = (id) => {
-    setFormData((prev) => ({
-      ...prev,
-      ticketTiers: prev.ticketTiers.filter((tier) => tier.id !== id),
-    }))
+  const handleImageDelete = async (imageUrl, imageType) => {
+    try {
+      setIsSubmitting(true)
+      const token = localStorage.getItem("token")
+      if (!token) throw new Error("No authentication token found")
+
+      const response = await fetch(`http://localhost:5000/api/events/delete-${imageType}-image`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ eventId: id, imageUrl }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`)
+      }
+
+      const data = await response.json()
+      if (data.status !== "success") throw new Error(data.message || "Failed to delete image")
+
+      if (imageType === "header") {
+        setHeaderImage(null)
+      } else {
+        setGalleryImages((prev) => prev.filter((img) => img !== imageUrl))
+      }
+
+      toast.success("Image deleted successfully!")
+    } catch (err) {
+      toast.error(err.message || "Failed to delete image")
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleRemoveTicketTier = async (ticketId) => {
+    try {
+      setIsSubmitting(true)
+      const token = localStorage.getItem("token")
+      if (!token) throw new Error("No authentication token found")
+
+      const response = await fetch(`http://localhost:5000/api/events/${id}/tickets/${ticketId}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`)
+      }
+
+      setFormData((prev) => ({
+        ...prev,
+        ticketTiers: prev.ticketTiers.filter((tier) => tier.id !== ticketId),
+      }))
+      toast.success("Ticket tier removed successfully!")
+    } catch (err) {
+      toast.error(err.message || "Failed to remove ticket tier")
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const handleSave = async () => {
     try {
       setIsSubmitting(true)
       const token = localStorage.getItem("token")
-      if (!token) {
-        throw new Error("No authentication token found")
-      }
+      if (!token) throw new Error("No authentication token found")
 
       const eventData = {
         eventName: formData.eventName.trim(),
         eventDescription: formData.eventDescription.trim(),
-        eventLocation: formData.eventLocation.trim(),
-        eventLocationTips: formData.eventLocationTips.trim() || null,
-        eventUrl: formData.eventUrl.trim(),
+        eventLocation: {
+          venue: formData.eventLocation.trim(),
+          locationTips: formData.eventLocationTips.trim() || null,
+        },
+        eventUrl: formData.eventUrl.trim() || null,
         eventCategory: formData.eventCategory,
         startDateTime: new Date(`${formData.startDate}T${formData.startTime}`).toISOString(),
         endDateTime: new Date(`${formData.endDate}T${formData.endTime}`).toISOString(),
@@ -238,10 +312,10 @@ const EventDetails = () => {
           tiktok: formData.tiktokUrl.trim() || null,
           website: formData.websiteUrl.trim() || null,
         },
-        tickets: formData.ticketTiers,
+        ticketTiers: formData.ticketTiers,
       }
 
-      const response = await fetch(`https://genpay-sl25bd.onrender.com/api/events/${id}`, {
+      const response = await fetch(`http://localhost:5000/api/events/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -255,49 +329,10 @@ const EventDetails = () => {
         throw new Error(errorData.message || `HTTP error! status: ${response.status}`)
       }
 
-      const data = await response.json()
-      if (data.status !== "success") {
-        throw new Error(data.message || "Failed to update event")
-      }
-
-      toast.success("Event updated successfully!", {
-        position: "top-right",
-        autoClose: 4000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: false,
-        style: {
-          background: "#1f2937",
-          color: "#ffffff",
-          border: "1px solid #374151",
-          borderRadius: "8px",
-          fontFamily: '"Poppins", sans-serif',
-          fontSize: "14px",
-        },
-      })
-
-      setTimeout(() => {
-        navigate("/dashboard")
-      }, 2000)
+      toast.success("Event updated successfully!")
+      setTimeout(() => navigate("/dashboard"), 2000)
     } catch (err) {
-      console.error("Error updating event:", err)
-      toast.error(err.message || "Failed to update event", {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: false,
-        style: {
-          background: "#1f2937",
-          color: "#ffffff",
-          border: "1px solid #ef4444",
-          borderRadius: "8px",
-          fontFamily: '"Poppins", sans-serif',
-          fontSize: "14px",
-        },
-      })
+      toast.error(err.message || "Failed to update event")
       if (err.message.includes("authentication") || err.message.includes("401") || err.message.includes("403")) {
         navigate("/login")
       }
@@ -354,8 +389,8 @@ const EventDetails = () => {
   }
 
   return (
-    <div className="min-h-screen bg-black px-6 py-8">
-      <div className="w-full max-w-4xl mx-auto">
+    <div className="min-h-screen bg-black px-4 sm:px-6 py-8">
+      <div className="w-full max-w-5xl mx-auto">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center mb-6">
@@ -366,8 +401,8 @@ const EventDetails = () => {
             >
               <ArrowLeft className="w-4 h-4 text-black" />
             </div>
-            <h1 className="text-white text-2xl font-medium" style={{ fontFamily: '"Poppins", sans-serif' }}>
-              Edit Event
+            <h1 className="text-white text-2xl font-medium truncate" style={{ fontFamily: '"Poppins", sans-serif' }}>
+              {formData.eventName || "Unnamed Event"}
             </h1>
           </div>
 
@@ -379,12 +414,17 @@ const EventDetails = () => {
                   <Ticket className="w-5 h-5 text-orange-500" />
                   <div>
                     <p className="text-white text-sm font-medium" style={{ fontFamily: '"Poppins", sans-serif' }}>
-                      Hi {event.createdBy?.name || "there"}, you have not added tickets to your event yet
+                      You haven't added tickets to your event yet
+                    </p>
+                    <p className="text-gray-400 text-xs" style={{ fontFamily: '"Poppins", sans-serif' }}>
+                      {event.isPublished
+                        ? "Your event is published but has no tickets. Add tickets to allow registrations."
+                        : "Add tickets and set a ticket policy to publish your event."}
                     </p>
                   </div>
                 </div>
                 <button
-                  onClick={() => setShowTicketForm(true)}
+                  onClick={() => navigate(`/add-ticket/${id}`)}
                   className="text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:opacity-90 text-sm"
                   style={{
                     background: "linear-gradient(135deg, #A228AF 0%, #FF0000 100%)",
@@ -399,59 +439,42 @@ const EventDetails = () => {
           )}
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column - Images */}
-          <div className="lg:col-span-1 space-y-6">
-            {/* Images Section */}
-            <div>
-              <h3 className="text-white text-lg font-medium mb-4" style={{ fontFamily: '"Poppins", sans-serif' }}>
-                Images
-              </h3>
-              <div className="space-y-4">
-                {eventImages.length > 0 ? (
-                  eventImages.map((image, index) => (
-                    <div key={index} className="relative">
-                      <img
-                        src={image.url || image}
-                        alt={`Event image ${index + 1}`}
-                        className="w-full h-48 object-cover rounded-lg"
-                      />
-                    </div>
-                  ))
-                ) : (
-                  <div className="w-full h-48 bg-gray-800 rounded-lg flex items-center justify-center">
-                    <img
-                      src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-KkYKKH5H6EAZTz53hX1cDlKr0NjUqq.png"
-                      alt="Event poster"
-                      className="w-full h-full object-cover rounded-lg"
-                    />
-                  </div>
-                )}
-              </div>
-            </div>
+        {/* Navigation Tabs */}
+        <div className="mb-8">
+          <nav className="flex flex-wrap gap-4 sm:gap-8 border-b border-gray-800 pb-2">
+            {["Event", "Tickets", "Sales", "More"].map((tab) => (
+              <button
+                key={tab}
+                onClick={() => {
+                  if (tab === "Tickets") {
+                    navigate(`/ticket-list/${id}`)
+                  } else if (tab === "Sales") {
+                    navigate(`/sales/${id}`)
+                  } else {
+                    setActiveTab(tab)
+                  }
+                }}
+                className={`px-4 py-2 text-sm font-medium transition-all duration-200 rounded-t-lg ${
+                  activeTab === tab
+                    ? "bg-gray-800 text-orange-500 border-b-2 border-orange-500"
+                    : "text-gray-400 hover:text-white hover:bg-gray-700"
+                }`}
+                style={{ fontFamily: '"Poppins", sans-serif' }}
+              >
+                {tab}
+              </button>
+            ))}
+          </nav>
+        </div>
 
-            {/* Gallery Section */}
-            <div>
-              <h3 className="text-white text-lg font-medium mb-4" style={{ fontFamily: '"Poppins", sans-serif' }}>
-                Gallery
-              </h3>
-              <div className="border-2 border-dashed border-gray-600 rounded-lg p-8 text-center hover:border-gray-500 transition-colors cursor-pointer">
-                <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                <p className="text-gray-400 text-sm" style={{ fontFamily: '"Poppins", sans-serif' }}>
-                  Add Image
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Right Column - Form */}
-          <div className="lg:col-span-2">
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Form Section */}
+          <div className="lg:w-2/3 order-1">
             <h2 className="text-white text-xl font-medium mb-6" style={{ fontFamily: '"Poppins", sans-serif' }}>
               Make changes to your event
             </h2>
-
             <form className="space-y-6">
-              {/* Event Name */}
+              {/* Form fields remain the same as in your original code */}
               <div>
                 <input
                   type="text"
@@ -462,8 +485,6 @@ const EventDetails = () => {
                   style={{ fontFamily: '"Poppins", sans-serif', borderRadius: "15px 15px 15px 0px" }}
                 />
               </div>
-
-              {/* Event Description */}
               <div>
                 <textarea
                   placeholder="Event Description"
@@ -474,20 +495,16 @@ const EventDetails = () => {
                   style={{ fontFamily: '"Poppins", sans-serif', borderRadius: "15px 15px 15px 0px" }}
                 />
               </div>
-
-              {/* Event Location */}
               <div>
                 <input
                   type="text"
-                  placeholder="Event Location"
+                  placeholder="Event Venue"
                   value={formData.eventLocation}
                   onChange={(e) => handleInputChange("eventLocation", e.target.value)}
                   className="w-full px-4 py-3 bg-transparent border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-gray-400 transition-colors text-sm"
                   style={{ fontFamily: '"Poppins", sans-serif', borderRadius: "15px 15px 15px 0px" }}
                 />
               </div>
-
-              {/* Location Tips */}
               <div>
                 <input
                   type="text"
@@ -498,8 +515,6 @@ const EventDetails = () => {
                   style={{ fontFamily: '"Poppins", sans-serif', borderRadius: "15px 15px 15px 0px" }}
                 />
               </div>
-
-              {/* Event Category */}
               <div>
                 <select
                   value={formData.eventCategory}
@@ -524,13 +539,11 @@ const EventDetails = () => {
                   ))}
                 </select>
               </div>
-
-              {/* Start Date and Time */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="relative">
                   <div
                     className="absolute left-3 top-1/2 transform -translate-y-1/2 z-10 cursor-pointer hover:text-gray-300 transition-colors"
-                    onClick={() => startDateRef.current?.showPicker?.() || startDateRef.current?.click()}
+                    onClick={() => startDateRef.current?.showPicker?.()}
                   >
                     <Calendar className="w-4 h-4 text-gray-400" />
                   </div>
@@ -547,11 +560,10 @@ const EventDetails = () => {
                     }}
                   />
                 </div>
-
                 <div className="relative">
                   <div
                     className="absolute left-3 top-1/2 transform -translate-y-1/2 z-10 cursor-pointer hover:text-gray-300 transition-colors"
-                    onClick={() => startTimeRef.current?.showPicker?.() || startTimeRef.current?.click()}
+                    onClick={() => startTimeRef.current?.showPicker?.()}
                   >
                     <Clock className="w-4 h-4 text-gray-400" />
                   </div>
@@ -569,13 +581,11 @@ const EventDetails = () => {
                   />
                 </div>
               </div>
-
-              {/* End Date and Time */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="relative">
                   <div
                     className="absolute left-3 top-1/2 transform -translate-y-1/2 z-10 cursor-pointer hover:text-gray-300 transition-colors"
-                    onClick={() => endDateRef.current?.showPicker?.() || endDateRef.current?.click()}
+                    onClick={() => endDateRef.current?.showPicker?.()}
                   >
                     <Calendar className="w-4 h-4 text-gray-400" />
                   </div>
@@ -592,11 +602,10 @@ const EventDetails = () => {
                     }}
                   />
                 </div>
-
                 <div className="relative">
                   <div
                     className="absolute left-3 top-1/2 transform -translate-y-1/2 z-10 cursor-pointer hover:text-gray-300 transition-colors"
-                    onClick={() => endTimeRef.current?.showPicker?.() || endTimeRef.current?.click()}
+                    onClick={() => endTimeRef.current?.showPicker?.()}
                   >
                     <Clock className="w-4 h-4 text-gray-400" />
                   </div>
@@ -614,8 +623,6 @@ const EventDetails = () => {
                   />
                 </div>
               </div>
-
-              {/* Date/Time Error */}
               {dateTimeError && (
                 <div className="flex items-start space-x-3 p-4 bg-red-900/20 border border-red-500/30 rounded-lg">
                   <AlertTriangle className="w-5 h-5 text-red-400 mt-0.5 flex-shrink-0" />
@@ -624,8 +631,6 @@ const EventDetails = () => {
                   </p>
                 </div>
               )}
-
-              {/* Social Links */}
               <div className="space-y-4">
                 <div className="relative">
                   <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
@@ -640,7 +645,6 @@ const EventDetails = () => {
                     style={{ fontFamily: '"Poppins", sans-serif', borderRadius: "15px 15px 15px 0px" }}
                   />
                 </div>
-
                 <div className="relative">
                   <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
                     <Twitter className="w-4 h-4 text-gray-400" />
@@ -654,7 +658,6 @@ const EventDetails = () => {
                     style={{ fontFamily: '"Poppins", sans-serif', borderRadius: "15px 15px 15px 0px" }}
                   />
                 </div>
-
                 <div className="relative">
                   <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
                     <Camera className="w-4 h-4 text-gray-400" />
@@ -668,7 +671,6 @@ const EventDetails = () => {
                     style={{ fontFamily: '"Poppins", sans-serif', borderRadius: "15px 15px 15px 0px" }}
                   />
                 </div>
-
                 <div className="relative">
                   <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
                     <svg className="w-4 h-4 text-gray-400" viewBox="0 0 24 24" fill="currentColor">
@@ -684,7 +686,6 @@ const EventDetails = () => {
                     style={{ fontFamily: '"Poppins", sans-serif', borderRadius: "15px 15px 15px 0px" }}
                   />
                 </div>
-
                 <div className="relative">
                   <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
                     <Globe className="w-4 h-4 text-gray-400" />
@@ -699,8 +700,6 @@ const EventDetails = () => {
                   />
                 </div>
               </div>
-
-              {/* Ticket Tiers */}
               {formData.ticketTiers.length > 0 && (
                 <div className="space-y-4">
                   <h4 className="text-white text-sm font-medium" style={{ fontFamily: '"Poppins", sans-serif' }}>
@@ -709,7 +708,9 @@ const EventDetails = () => {
                   {formData.ticketTiers.map((tier) => (
                     <div key={tier.id} className="flex items-center justify-between bg-gray-800 p-3 rounded-lg">
                       <span className="text-white text-sm" style={{ fontFamily: '"Poppins", sans-serif' }}>
-                        {tier.name}: ${tier.price} (Qty: {tier.quantity})
+                        {tier.name}: ₦{tier.price.toLocaleString()} (Qty: {tier.quantity})
+                        {tier.ticketType === "Group" && `, Group Size: ${tier.groupSize}`}
+                        {tier.description && <span className="text-gray-400 text-xs ml-2"> - {tier.description}</span>}
                       </span>
                       <button
                         onClick={() => handleRemoveTicketTier(tier.id)}
@@ -719,67 +720,19 @@ const EventDetails = () => {
                       </button>
                     </div>
                   ))}
+                  <button
+                    onClick={() => navigate(`/add-ticket/${id}`)}
+                    className="text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:opacity-90 text-sm"
+                    style={{
+                      background: "linear-gradient(135deg, #A228AF 0%, #FF0000 100%)",
+                      fontFamily: '"Poppins", sans-serif',
+                      borderRadius: "15px 15px 15px 0px",
+                    }}
+                  >
+                    Add Another Ticket
+                  </button>
                 </div>
               )}
-
-              {/* Add Ticket Form */}
-              {showTicketForm && (
-                <div className="space-y-4 p-4 bg-gray-900 rounded-lg border border-gray-700">
-                  <h4 className="text-white text-sm font-medium" style={{ fontFamily: '"Poppins", sans-serif' }}>
-                    Add Ticket Tier
-                  </h4>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    <input
-                      type="text"
-                      placeholder="Tier Name"
-                      value={newTicketTier.name}
-                      onChange={(e) => setNewTicketTier({ ...newTicketTier, name: e.target.value })}
-                      className="px-3 py-2 bg-transparent border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-gray-400 transition-colors text-sm"
-                      style={{ fontFamily: '"Poppins", sans-serif' }}
-                    />
-                    <input
-                      type="number"
-                      placeholder="Price ($)"
-                      value={newTicketTier.price}
-                      onChange={(e) => setNewTicketTier({ ...newTicketTier, price: e.target.value })}
-                      className="px-3 py-2 bg-transparent border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-gray-400 transition-colors text-sm"
-                      style={{ fontFamily: '"Poppins", sans-serif' }}
-                    />
-                    <input
-                      type="number"
-                      placeholder="Quantity"
-                      value={newTicketTier.quantity}
-                      onChange={(e) => setNewTicketTier({ ...newTicketTier, quantity: e.target.value })}
-                      className="px-3 py-2 bg-transparent border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-gray-400 transition-colors text-sm"
-                      style={{ fontFamily: '"Poppins", sans-serif' }}
-                    />
-                  </div>
-                  <div className="flex gap-3">
-                    <button
-                      type="button"
-                      onClick={handleAddTicketTier}
-                      className="flex items-center text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:opacity-90 text-sm"
-                      style={{
-                        background: "linear-gradient(135deg, #A228AF 0%, #FF0000 100%)",
-                        fontFamily: '"Poppins", sans-serif',
-                        borderRadius: "15px 15px 15px 0px",
-                      }}
-                    >
-                      <Plus className="w-4 h-4 mr-1" /> Add Tier
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setShowTicketForm(false)}
-                      className="px-4 py-2 text-gray-400 hover:text-white font-medium transition-colors text-sm border border-gray-600 rounded-lg hover:border-gray-500"
-                      style={{ fontFamily: '"Poppins", sans-serif' }}
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {/* Save Button */}
               <div className="pt-6">
                 <button
                   type="button"
@@ -807,10 +760,114 @@ const EventDetails = () => {
               </div>
             </form>
           </div>
+
+          {/* Images Section */}
+          <div className="lg:w-1/3 order-2 lg:order-1">
+            <div className="space-y-6">
+              {/* Header Image */}
+              <div>
+                <h3 className="text-white text-lg font-medium mb-4" style={{ fontFamily: '"Poppins", sans-serif' }}>
+                  Header Image
+                </h3>
+                <div className="relative">
+                  {headerImage ? (
+                    <>
+                      <img
+                        src={headerImage}
+                        alt="Event header"
+                        className="w-full h-48 object-cover rounded-lg"
+                      />
+                      <button
+                        onClick={() => handleImageDelete(headerImage, "header")}
+                        className="absolute top-2 right-2 bg-gray-900/80 p-1 rounded-full text-red-400 hover:text-red-300 transition-colors"
+                        disabled={isSubmitting}
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </>
+                  ) : (
+                    <div className="w-full h-48 bg-gray-800 rounded-lg flex items-center justify-center">
+                      <span className="text-gray-400 text-sm" style={{ fontFamily: '"Poppins", sans-serif' }}>
+                        No header image
+                      </span>
+                    </div>
+                  )}
+                </div>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => handleImageUpload(e, "header")}
+                  className="hidden"
+                  id="header-upload"
+                  ref={headerFileInputRef}
+                  disabled={isSubmitting}
+                />
+                <label
+                  htmlFor="header-upload"
+                  className="mt-4 block border-2 border-dashed border-gray-600 rounded-lg p-4 text-center hover:border-gray-500 transition-colors cursor-pointer"
+                >
+                  <Upload className="w-6 h-6 text-gray-400 mx-auto mb-2" />
+                  <p className="text-gray-400 text-sm" style={{ fontFamily: '"Poppins", sans-serif' }}>
+                    {headerImage ? "Replace Header Image" : "Upload Header Image"}
+                  </p>
+                </label>
+              </div>
+
+              {/* Gallery Images */}
+              <div>
+                <h3 className="text-white text-lg font-medium mb-4" style={{ fontFamily: '"Poppins", sans-serif' }}>
+                  Event Gallery
+                </h3>
+                <div className="grid grid-cols-2 gap-4">
+                  {galleryImages.length > 0 ? (
+                    galleryImages.map((image, index) => (
+                      <div key={index} className="relative">
+                        <img
+                          src={image}
+                          alt={`Gallery image ${index + 1}`}
+                          className="w-full h-32 object-cover rounded-lg"
+                        />
+                        <button
+                          onClick={() => handleImageDelete(image, "gallery")}
+                          className="absolute top-2 right-2 bg-gray-900/80 p-1 rounded-full text-red-400 hover:text-red-300 transition-colors"
+                          disabled={isSubmitting}
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="col-span-2 w-full h-32 bg-gray-800 rounded-lg flex items-center justify-center">
+                      <span className="text-gray-400 text-sm" style={{ fontFamily: '"Poppins", sans-serif' }}>
+                        No gallery images
+                      </span>
+                    </div>
+                  )}
+                </div>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => handleImageUpload(e, "gallery")}
+                  className="hidden"
+                  id="gallery-upload"
+                  ref={galleryFileInputRef}
+                  disabled={isSubmitting}
+                />
+                <label
+                  htmlFor="gallery-upload"
+                  className="mt-4 block border-2 border-dashed border-gray-600 rounded-lg p-4 text-center hover:border-gray-500 transition-colors cursor-pointer"
+                >
+                  <Upload className="w-6 h-6 text-gray-400 mx-auto mb-2" />
+                  <p className="text-gray-400 text-sm" style={{ fontFamily: '"Poppins", sans-serif' }}>
+                    Upload Gallery Image
+                  </p>
+                </label>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Toast Container */}
       <ToastContainer
         position="top-right"
         autoClose={4000}

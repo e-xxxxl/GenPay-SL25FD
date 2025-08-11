@@ -128,7 +128,7 @@ const UploadEventGallery = ({ onNavigate, onGalleryUpload, onSkip, onContinue })
         formData.append("eventId", eventId); // Include eventId
 
         try {
-          const response = await axios.post("https://genpay-sl25bd.onrender.com/api/events/upload-gallery", formData, {
+          const response = await axios.post("http://localhost:5000/api/events/upload-gallery", formData, {
             headers: {
               Authorization: `Bearer ${token}`,
               "Content-Type": "multipart/form-data",
@@ -211,15 +211,15 @@ const UploadEventGallery = ({ onNavigate, onGalleryUpload, onSkip, onContinue })
         });
       }
 
-      // Navigate to next step or dashboard
-    //   setTimeout(() => {
-    //     if (onNavigate) {
-    //       onNavigate("/dashboard");
-    //     } else {
-    //       navigate("/dashboard");
-    //     }
-    //   }, 2000);
-    // } catch (error) {
+    //   Navigate to next step or dashboard
+      setTimeout(() => {
+        if (onNavigate) {
+          onNavigate("/dashboard");
+        } else {
+          navigate("/dashboard");
+        }
+      }, 2000);
+    } catch (error) {
       console.error("Gallery upload failed:", error);
       let errorMessage = error.response?.data?.message || "Failed to upload gallery images. Please try again.";
       toast.error(errorMessage, {
@@ -286,6 +286,7 @@ const UploadEventGallery = ({ onNavigate, onGalleryUpload, onSkip, onContinue })
   const handleSkip = () => {
     if (onSkip) {
       onSkip()
+      navigate("/dashboard");
     } else {
       console.log("Skipping gallery upload")
     }
