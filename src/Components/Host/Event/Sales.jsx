@@ -144,8 +144,18 @@ const Sales = () => {
           setShowScanner(false);
           return;
         }
-        console.log("Scanning QR code:", data.text);
-        const qrCode = data.text;
+
+        let qrCode = data.text;
+        // Parse JSON if QR code is JSON-formatted
+        try {
+          const parsed = JSON.parse(data.text);
+          qrCode = parsed.ticketId || data.text; // Fallback to raw text if no ticketId
+          console.log("Parsed QR code ticketId:", qrCode);
+        } catch (e) {
+          console.warn("QR code is not JSON, using raw text:", qrCode);
+        }
+
+        console.log("Scanning QR code:", qrCode);
         const response = await fetch(`https://genpay-sl25bd-1.onrender.com/api/events/scan-ticket`, {
           method: 'POST',
           headers: {
