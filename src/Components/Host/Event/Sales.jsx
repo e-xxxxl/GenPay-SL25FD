@@ -1,10 +1,10 @@
 // Components/Host/Event/Sales.jsx
 "use client"
 
-import { useEffect, useMemo, useState, useCallback, Component } from "react";
+import { useEffect, useMemo, useState, useCallback, Component, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Info, ScanLine } from "lucide-react";
-import QRScanner from "react-qr-scanner";
+import { BrowserQRCodeReader, NotFoundException } from "@zxing/library";
 
 // Error Boundary Component
 class ErrorBoundary extends Component {
@@ -78,6 +78,8 @@ const Sales = () => {
   const [payouts, setPayouts] = useState([]);
   const [error, setError] = useState("");
   const [cameraAvailable, setCameraAvailable] = useState(true);
+  const videoRef = useRef(null);
+  const codeReader = useRef(null);
 
   useEffect(() => {
     const userAgent = navigator.userAgent.toLowerCase();
@@ -90,6 +92,7 @@ const Sales = () => {
       .then(devices => {
         const hasCamera = devices.some(device => device.kind === 'videoinput');
         setCameraAvailable(hasCamera);
+        console.log("Available cameras:", devices.filter(d => d.kind === 'videoinput'));
         if (!hasCamera) {
           setError("No camera detected. QR scanning is unavailable.");
         }
@@ -101,7 +104,38 @@ const Sales = () => {
       });
   }, []);
 
+  useEffect(() => {
+    if (showScanner && cameraAvailable) {
+      codeReader.current = new BrowserQRCodeReader();
+      codeReader.current
+        .decodeFromVideoDevice(null, videoRef.current, (result, err) => {
+          if (result) {
+            console.log("QR code detected:", result.getText());
+            handleScan({ text: result.getText() });
+          }
+          if (err && !(err instanceof NotFoundException)) {
+            console.error("ZXing QR Scanner error:", err);
+            setError(`Scanner error: ${err.message}`);
+            setShowScanner(false);
+          }
+        })
+        .catch(err => {
+          console.error("ZXing initialization error:", err);
+          setError(`Failed to initialize scanner: ${err.message}`);
+          setShowScanner(false);
+        });
+
+      return () => {
+        if (codeReader.current) {
+          codeReader.current.reset();
+          console.log("QR scanner reset");
+        }
+      };
+    }
+  }, [showScanner, cameraAvailable]);
+
   const handleScan = async (data) => {
+    console.log("handleScan called with data:", data);
     if (data && data.text) {
       try {
         const token = localStorage.getItem("token");
@@ -111,7 +145,7 @@ const Sales = () => {
           return;
         }
         console.log("Scanning QR code:", data.text);
-        const qrCode = data.text; // Use raw text from QR code
+        const qrCode = data.text;
         const response = await fetch(`https://genpay-sl25bd-1.onrender.com/api/events/scan-ticket`, {
           method: 'POST',
           headers: {
@@ -421,20 +455,15 @@ const Sales = () => {
         {showScanner && (
           <ErrorBoundary>
             <div className="mb-6">
-              <QRScanner
-                onScan={handleScan}
-                onError={(err) => {
-                  console.error("QR Scanner error:", err);
-                  setError(`Scanner error: ${err.message}`);
-                  setShowScanner(false);
-                }}
+              <video
+                ref={videoRef}
                 style={{ width: '100%', maxWidth: '400px' }}
-                constraints={{
-                  video: {
-                    facingMode: isMobile ? 'environment' : 'user',
-                  },
-                }}
+                muted
+                playsInline
               />
+              <p className="text-sm text-gray-400 mt-2">
+                Ensure the QR code is well-lit and in focus.
+              </p>
             </div>
           </ErrorBoundary>
         )}
