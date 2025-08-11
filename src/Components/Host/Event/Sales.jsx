@@ -27,7 +27,7 @@ class ErrorBoundary extends Component {
   }
 }
 
-// Custom debounce function with cancel method
+// Custom debounce function
 function debounce(func, wait) {
   let timeout;
   const debounced = function (...args) {
@@ -107,10 +107,12 @@ const Sales = () => {
   useEffect(() => {
     if (showScanner && cameraAvailable) {
       codeReader.current = new BrowserQRCodeReader();
+      console.log("Initializing QR scanner...");
       codeReader.current
         .decodeFromVideoDevice(null, videoRef.current, (result, err) => {
+          console.log("decodeFromVideoDevice callback triggered", { result, err });
           if (result) {
-            console.log("QR code detected:", result.getText());
+            console.log("QR code raw data:", result.getText());
             handleScan({ text: result.getText() });
           }
           if (err && !(err instanceof NotFoundException)) {
@@ -136,63 +138,65 @@ const Sales = () => {
 
   const handleScan = async (data) => {
     console.log("handleScan called with data:", data);
-    if (data && data.text) {
-      try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          setError("Authentication token missing. Please log in.");
-          setShowScanner(false);
-          return;
-        }
-
-        let qrCode = data.text;
-        // Parse JSON if QR code is JSON-formatted
-        try {
-          const parsed = JSON.parse(data.text);
-          qrCode = parsed.ticketId || data.text; // Fallback to raw text if no ticketId
-          console.log("Parsed QR code ticketId:", qrCode);
-        } catch (e) {
-          console.warn("QR code is not JSON, using raw text:", qrCode);
-        }
-
-        console.log("Scanning QR code:", qrCode);
-        const response = await fetch(`https://genpay-sl25bd-1.onrender.com/api/events/scan-ticket`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ qrCode }),
-        });
-
-        const result = await response.json();
-        console.log("Scan response:", result);
-        if (result.status === 'success') {
-          setSearchResults([{
-            ...result.data.ticket,
-            status: 'valid',
-            color: 'green',
-          }]);
-          fetchAll();
-        } else if (result.status === 'fail' && result.message.includes('already been used')) {
-          setSearchResults([{
-            ...result.data.ticket,
-            status: 'used',
-            color: 'red',
-          }]);
-        } else {
-          setError(result.message || "Failed to scan ticket");
-        }
-      } catch (err) {
-        console.error("Scan error:", err);
-        setError('Failed to scan ticket: ' + err.message);
-      }
-      setShowScanner(false);
-    } else {
+    if (!data || !data.text) {
       console.warn("No valid QR code data received:", data);
       setError("No valid QR code detected. Please try again.");
       setShowScanner(false);
+      return;
     }
+
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setError("Authentication token missing. Please log in.");
+        setShowScanner(false);
+        return;
+      }
+
+      let qrCode = data.text;
+      console.log("Raw QR code data:", qrCode);
+      // Parse JSON if QR code is JSON-formatted
+      try {
+        const parsed = JSON.parse(qrCode);
+        qrCode = parsed.ticketId || qrCode;
+        console.log("Parsed QR code ticketId:", qrCode);
+      } catch (e) {
+        console.warn("QR code is not JSON, using raw text:", qrCode);
+      }
+
+      console.log("Sending QR code to backend:", qrCode);
+      const response = await fetch(`https://genpay-sl25bd-1.onrender.com/api/events/scan-ticket`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ qrCode }),
+      });
+
+      const result = await response.json();
+      console.log("Scan response:", result);
+      if (result.status === 'success') {
+        setSearchResults([{
+          ...result.data.ticket,
+          status: 'valid',
+          color: 'green',
+        }]);
+        fetchAll();
+      } else if (result.status === 'fail' && result.message.includes('already been used')) {
+        setSearchResults([{
+          ...result.data.ticket,
+          status: 'used',
+          color: 'red',
+        }]);
+      } else {
+        setError(result.message || "Failed to scan ticket");
+      }
+    } catch (err) {
+      console.error("Scan error:", err);
+      setError('Failed to scan ticket: ' + err.message);
+    }
+    setShowScanner(false);
   };
 
   const debouncedSearch = useCallback(
@@ -287,36 +291,7 @@ const Sales = () => {
           setCheckins(rows);
         } else {
           console.warn("Checkins fetch failed, status:", checkinRes.status, checkinRes.value?.status);
-          setCheckins([
-            {
-              guestEmail: "j_doe@email.com",
-              dateTime: "2025-03-23T15:23:00Z",
-              count: 2,
-              amount: 48000,
-              status: "Used",
-            },
-            {
-              guestEmail: "johnwick@email.com",
-              dateTime: "2025-03-18T13:37:00Z",
-              count: 1,
-              amount: 24000,
-              status: "Used",
-            },
-            {
-              guestEmail: "janedoe@email.com",
-              dateTime: "2025-03-20T19:05:00Z",
-              count: 3,
-              amount: 72000,
-              status: "Used",
-            },
-            {
-              guestEmail: "jay@email.com",
-              dateTime: "2025-03-22T20:11:00Z",
-              count: 2,
-              amount: 48000,
-              status: "Used",
-            },
-          ]);
+          setCheckins([]);
         }
 
         if (ticketBuyersRes.status === "fulfilled" && ticketBuyersRes.value.ok) {
@@ -326,43 +301,7 @@ const Sales = () => {
           setGuests(rows);
         } else {
           console.warn("Ticket buyers fetch failed, status:", ticketBuyersRes.status, ticketBuyersRes.value?.status);
-          setGuests([
-            {
-              name: "Afeez Tosinuwaji",
-              email: "im*********@yoo***.com",
-              phone: "08012345632",
-              location: "Abuja",
-              checkedIn: true,
-            },
-            {
-              name: "Afeez Tosinuwaji",
-              email: "im*********@yoo***.com",
-              phone: "08012345633",
-              location: "Abuja",
-              checkedIn: false,
-            },
-            {
-              name: "Afeez Tosinuwaji",
-              email: "im*********@yoo***.com",
-              phone: "08012345634",
-              location: "Abuja",
-              checkedIn: false,
-            },
-            {
-              name: "Afeez Tosinuwaji",
-              email: "im*********@yoo***.com",
-              phone: "08012345635",
-              location: "Abuja",
-              checkedIn: true,
-            },
-            {
-              name: "Afeez Tosinuwaji",
-              email: "im*********@yoo***.com",
-              phone: "08012345636",
-              location: "Abuja",
-              checkedIn: false,
-            },
-          ]);
+          setGuests([]);
         }
 
         if (payoutsRes.status === "fulfilled" && payoutsRes.value.ok) {
