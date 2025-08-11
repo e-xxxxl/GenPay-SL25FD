@@ -23,7 +23,7 @@ const ThirdSection = ({ onCreateEvent }) => {
           throw new Error("No authentication token found");
         }
 
-        const response = await fetch("http://localhost:5000/api/events", {
+        const response = await fetch("https://genpay-sl25bd-1.onrender.com/api/events", {
           method: "GET",
           headers: {
             "Content-Type": "application/json",

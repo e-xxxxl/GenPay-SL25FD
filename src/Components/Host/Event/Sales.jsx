@@ -112,7 +112,7 @@ const Sales = () => {
         }
         console.log("Scanning QR code:", data.text);
         const qrCode = data.text; // Use raw text from QR code
-        const response = await fetch(`http://localhost:5000/api/events/scan-ticket`, {
+        const response = await fetch(`https://genpay-sl25bd-1.onrender.com/api/events/scan-ticket`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -165,7 +165,7 @@ const Sales = () => {
           return;
         }
         console.log("Searching for:", query, "Event ID:", id);
-        const response = await fetch(`http://localhost:5000/api/events/${id}/search-ticket`, {
+        const response = await fetch(`https://genpay-sl25bd-1.onrender.com/api/events/${id}/search-ticket`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -218,10 +218,10 @@ const Sales = () => {
 
         console.log("Fetching data for event ID:", id);
         const [eventRes, checkinRes, ticketBuyersRes, payoutsRes] = await Promise.allSettled([
-          fetch(`http://localhost:5000/api/events/${id}`, { headers }),
-          fetch(`http://localhost:5000/api/events/${id}/checkins`, { headers }),
-          fetch(`http://localhost:5000/api/events/${id}/ticket-buyers`, { headers }),
-          fetch(`http://localhost:5000/api/events/${id}/payouts`, { headers }),
+          fetch(`https://genpay-sl25bd-1.onrender.com/api/events/${id}`, { headers }),
+          fetch(`https://genpay-sl25bd-1.onrender.com/api/events/${id}/checkins`, { headers }),
+          fetch(`https://genpay-sl25bd-1.onrender.com/api/events/${id}/ticket-buyers`, { headers }),
+          fetch(`https://genpay-sl25bd-1.onrender.com/api/events/${id}/payouts`, { headers }),
         ]);
 
         if (cancelled) return;

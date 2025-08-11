@@ -21,9 +21,9 @@ const Explore = () => {
     try {
       setLoading(true);
       setError(null);
-      console.log(`Fetching events from: http://localhost:5000/api/events/public?page=${pageNum}`);
+      console.log(`Fetching events from: https://genpay-sl25bd-1.onrender.com/api/events/public?page=${pageNum}`);
 
-      const response = await fetch(`http://localhost:5000/api/events/public?page=${pageNum}`, {
+      const response = await fetch(`https://genpay-sl25bd-1.onrender.com/api/events/public?page=${pageNum}`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
       });

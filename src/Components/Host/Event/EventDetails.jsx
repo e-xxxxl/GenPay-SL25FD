@@ -91,7 +91,7 @@ const EventDetails = () => {
         const token = localStorage.getItem("token")
         if (!token) throw new Error("No authentication token found")
 
-        const response = await fetch(`http://localhost:5000/api/events/${id}`, {
+        const response = await fetch(`https://genpay-sl25bd-1.onrender.com/api/events/${id}`, {
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
@@ -187,7 +187,7 @@ const EventDetails = () => {
       formData.append("eventId", id)
 
       const endpoint = imageType === "header" ? "/upload-image" : "/upload-gallery"
-      const response = await fetch(`http://localhost:5000/api/events${endpoint}`, {
+      const response = await fetch(`https://genpay-sl25bd-1.onrender.com/api/events${endpoint}`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
         body: formData,
@@ -226,7 +226,7 @@ const EventDetails = () => {
       const token = localStorage.getItem("token")
       if (!token) throw new Error("No authentication token found")
 
-      const response = await fetch(`http://localhost:5000/api/events/delete-${imageType}-image`, {
+      const response = await fetch(`https://genpay-sl25bd-1.onrender.com/api/events/delete-${imageType}-image`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -263,7 +263,7 @@ const EventDetails = () => {
       const token = localStorage.getItem("token")
       if (!token) throw new Error("No authentication token found")
 
-      const response = await fetch(`http://localhost:5000/api/events/${id}/tickets/${ticketId}`, {
+      const response = await fetch(`https://genpay-sl25bd-1.onrender.com/api/events/${id}/tickets/${ticketId}`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -315,7 +315,7 @@ const EventDetails = () => {
         ticketTiers: formData.ticketTiers,
       }
 
-      const response = await fetch(`http://localhost:5000/api/events/${id}`, {
+      const response = await fetch(`https://genpay-sl25bd-1.onrender.com/api/events/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

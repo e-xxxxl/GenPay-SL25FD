@@ -57,7 +57,7 @@ const Payment = () => {
 
   const handlePaystackSuccess = async (reference) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/events/${event._id}/purchase-ticket`, {
+      const response = await fetch(`https://genpay-sl25bd-1.onrender.com/api/events/${event._id}/purchase-ticket`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
