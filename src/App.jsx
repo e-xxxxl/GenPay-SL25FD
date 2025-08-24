@@ -32,6 +32,8 @@ import CheckoutPage from "./Components/Pages/CheckoutPage";
 import PaymentPage from "./Components/Pages/PaymentPage";
 import Success from "./Components/Explore/Tickets/Success";
 import Sales from "./Components/Host/Event/Sales";
+import LegalDocumentation from "./Components/Explore/LegalDocumentation";
+import RefundPolicy from "./Components/Explore/RefundPolicy";
 
 function App() {
   return (
@@ -63,6 +65,8 @@ function App() {
         <Route path="/checkout/:eventId" element={<CheckoutPage/>} />
         <Route path="/checkout/payment" element={<PaymentPage/>} />
         <Route path="/checkout/success" element={<Success/>} />
+        <Route path="/legal" element={<LegalDocumentation/>} />
+        <Route path="/legal/refund-policy" element={<RefundPolicy/>} />
       </Routes>
     </>
   );

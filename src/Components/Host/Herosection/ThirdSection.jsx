@@ -1,7 +1,6 @@
-// components/ThirdSection.jsx
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom"; // Add this if using React Router
-import { MoreVertical, Plus, Calendar, MapPin, Users, CheckCircle } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import { MoreVertical, Plus, Calendar, MapPin, Users, CheckCircle, AlertCircle, Trash2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const ThirdSection = ({ onCreateEvent }) => {
@@ -9,7 +8,20 @@ const ThirdSection = ({ onCreateEvent }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState("All");
-  const navigate = useNavigate(); // Add this for navigation
+  const [dropdownEventId, setDropdownEventId] = useState(null); // Track which event's dropdown is open
+  const dropdownRef = useRef(null); // Ref for clicking outside to close dropdown
+  const navigate = useNavigate();
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setDropdownEventId(null);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   // Fetch events from backend
   useEffect(() => {
@@ -60,21 +72,15 @@ const ThirdSection = ({ onCreateEvent }) => {
       setEvents((prevEvents) =>
         prevEvents.map((event) => {
           const eventEndDate = new Date(event.endDate || event.date);
-          const eventStartDate = new Date(event.date);
+          const hasTickets = event.tickets && Array.isArray(event.tickets) && event.tickets.length > 0;
 
-          let status = "upcoming"; // Default status
-          const hasTicketPolicy =
-            event.ticketPolicy &&
-            (event.ticketPolicy.refundPolicy ||
-             event.ticketPolicy.transferPolicy ||
-             event.ticketPolicy.otherRules);
-
-          if (now > eventEndDate && hasTicketPolicy) {
-            status = "completed";
-          } else if (!hasTicketPolicy && now <= eventEndDate) {
-            status = "notcompleted";
-          } else if (hasTicketPolicy && now >= eventStartDate && now <= eventEndDate) {
-            status = "ongoing";
+          let status;
+          if (!hasTickets) {
+            status = "notcompleted"; // Event setup incomplete if no tickets
+          } else if (now > eventEndDate) {
+            status = "completed"; // Event ended if current time is after end date
+          } else {
+            status = "upcoming"; // Event is upcoming if current time is before or on end date
           }
 
           return { ...event, status };
@@ -84,8 +90,8 @@ const ThirdSection = ({ onCreateEvent }) => {
 
     if (events.length > 0) {
       checkEventStatus();
-      const interval = setInterval(checkEventStatus, 60000);
-      return () => clearInterval(interval);
+      const interval = setInterval(checkEventStatus, 60000); // Update every minute
+      return () => clearInterval(interval); // Cleanup interval on unmount
     }
   }, [events.length]);
 
@@ -93,17 +99,55 @@ const ThirdSection = ({ onCreateEvent }) => {
     if (onCreateEvent) {
       onCreateEvent();
     } else {
-      window.location.href = "/create-event";
+      navigate("/create-event");
     }
   };
 
   const handleEventClick = (event) => {
-    navigate(`/event-details/${event.id}`); // Navigate to EventDetails with event ID
+    navigate(`/event-details/${event.id}`);
   };
 
   const handleEventMenu = (event, action) => {
-    console.log(`${action} event:`, event.title);
-    // Handle edit, delete, duplicate, etc.
+    if (action === "menu") {
+      setDropdownEventId(dropdownEventId === event.id ? null : event.id); // Toggle dropdown
+    } else if (action === "delete") {
+      if (window.confirm(`Are you sure you want to delete the event "${event.title}"? This action cannot be undone.`)) {
+        handleDeleteEvent(event.id);
+      }
+    }
+  };
+
+  const handleDeleteEvent = async (eventId) => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("No authentication token found");
+      }
+
+      const response = await fetch(`https://genpay-sl25bd-1.onrender.com/api/events/${eventId}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      if (data.status !== "success") {
+        throw new Error(data.message || "Failed to delete event");
+      }
+
+      // Remove the deleted event from the state
+      setEvents((prevEvents) => prevEvents.filter((event) => event.id !== eventId));
+      setDropdownEventId(null); // Close dropdown
+    } catch (err) {
+      console.error("Error deleting event:", err);
+      setError(err.message || "Failed to delete event");
+    }
   };
 
   const categories = [
@@ -285,7 +329,11 @@ const ThirdSection = ({ onCreateEvent }) => {
                 exit={{ opacity: 0, scale: 0.9 }}
                 transition={{ duration: 0.3 }}
                 className={`relative bg-gray-900 rounded-2xl overflow-hidden hover:bg-gray-800 transition-all duration-300 cursor-pointer group shadow-lg hover:shadow-xl ${
-                  event.status === "completed" ? "ring-2 ring-green-500 ring-opacity-50" : ""
+                  event.status === "completed"
+                    ? "ring-2 ring-green-500 ring-opacity-50"
+                    : event.status === "notcompleted"
+                    ? "ring-2 ring-yellow-500 ring-opacity-50"
+                    : ""
                 }`}
                 onClick={() => handleEventClick(event)}
               >
@@ -312,6 +360,29 @@ const ThirdSection = ({ onCreateEvent }) => {
                     />
                   </motion.div>
                 )}
+                {event.status === "notcompleted" && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="absolute inset-0 bg-gradient-to-br from-yellow-500/10 to-amber-500/10 z-10 pointer-events-none"
+                  >
+                    <motion.div
+                      animate={{
+                        background: [
+                          "linear-gradient(45deg, rgba(234, 179, 8, 0.05) 0%, rgba(245, 158, 11, 0.05) 100%)",
+                          "linear-gradient(45deg, rgba(234, 179, 8, 0.15) 0%, rgba(245, 158, 11, 0.15) 100%)",
+                          "linear-gradient(45deg, rgba(234, 179, 8, 0.05) 0%, rgba(245, 158, 11, 0.05) 100%)",
+                        ],
+                      }}
+                      transition={{
+                        duration: 2,
+                        repeat: Number.POSITIVE_INFINITY,
+                        ease: "easeInOut",
+                      }}
+                      className="w-full h-full"
+                    />
+                  </motion.div>
+                )}
                 <div className="absolute top-3 left-3 z-20">
                   {event.status === "completed" && (
                     <motion.div
@@ -323,17 +394,25 @@ const ThirdSection = ({ onCreateEvent }) => {
                       Completed
                     </motion.div>
                   )}
-                  {event.status === "ongoing" && (
-                    <div className="flex items-center bg-orange-500 text-white px-2 py-1 rounded-full text-xs font-medium shadow-lg">
-                      <div className="w-2 h-2 bg-white rounded-full mr-1 animate-pulse" />
-                      Live
-                    </div>
+                  {event.status === "upcoming" && (
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      className="flex items-center bg-blue-500 text-white px-2 py-1 rounded-full text-xs font-medium shadow-lg"
+                    >
+                      <Calendar className="w-3 h-3 mr-1" />
+                      Upcoming
+                    </motion.div>
                   )}
                   {event.status === "notcompleted" && (
-                    <div className="flex items-center bg-yellow-500 text-white px-2 py-1 rounded-full text-xs font-medium shadow-lg">
-                      <div className="w-2 h-2 bg-white rounded-full mr-1 animate-pulse" />
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      className="flex items-center bg-yellow-500 text-white px-2 py-1 rounded-full text-xs font-medium shadow-lg"
+                    >
+                      <AlertCircle className="w-3 h-3 mr-1" />
                       Event Setup Incomplete
-                    </div>
+                    </motion.div>
                   )}
                 </div>
                 <div className="relative">
@@ -345,15 +424,37 @@ const ThirdSection = ({ onCreateEvent }) => {
                       e.target.src = "/placeholder.svg?height=160&width=300";
                     }}
                   />
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleEventMenu(event, "menu");
-                    }}
-                    className="absolute top-3 right-3 p-2 bg-black/60 rounded-full text-white hover:bg-black/80 transition-colors z-20 backdrop-blur-sm"
-                  >
-                    <MoreVertical className="w-4 h-4" />
-                  </button>
+                  <div className="absolute top-3 right-3 z-20" ref={dropdownRef}>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEventMenu(event, "menu");
+                      }}
+                      className="p-2 bg-black/60 rounded-full text-white hover:bg-black/80 transition-colors backdrop-blur-sm"
+                    >
+                      <MoreVertical className="w-4 h-4" />
+                    </button>
+                    {dropdownEventId === event.id && (
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                        transition={{ duration: 0.2 }}
+                        className="absolute right-0 mt-2 w-48 bg-gray-800 rounded-lg shadow-xl border border-gray-700 z-30"
+                      >
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleEventMenu(event, "delete");
+                          }}
+                          className="flex items-center w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-gray-700 hover:text-red-300 transition-colors"
+                        >
+                          <Trash2 className="w-4 h-4 mr-2" />
+                          Delete Event
+                        </button>
+                      </motion.div>
+                    )}
+                  </div>
                 </div>
                 <div className="p-5 relative z-10">
                   <h3
@@ -410,7 +511,7 @@ const ThirdSection = ({ onCreateEvent }) => {
           <button
             onClick={() => {
               localStorage.removeItem("token");
-              window.location.href = "/login";
+              navigate("/login");
             }}
             className="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-lg text-sm transition-colors shadow-lg"
             style={{ fontFamily: '"Poppins", sans-serif' }}

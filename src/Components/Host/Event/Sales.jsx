@@ -1,9 +1,9 @@
 // Components/Host/Event/Sales.jsx
 "use client";
 
-import { useEffect, useMemo, useState, useCallback } from "react";
+import { useEffect, useMemo, useState, useCallback, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Info, ScanLine, CheckCircle } from "lucide-react";
+import { ArrowLeft, Info, ScanLine, CheckCircle, X } from "lucide-react";
 
 // Custom debounce function
 function debounce(func, wait) {
@@ -51,9 +51,9 @@ const Sales = () => {
   const [eventTitle, setEventTitle] = useState("Event");
   const [checkins, setCheckins] = useState([]);
   const [guests, setGuests] = useState([]);
-  const [payouts, setPayouts] = useState([]);
   const [error, setError] = useState("");
   const [searchLoading, setSearchLoading] = useState(false);
+  const dropdownRef = useRef(null);
 
   const fetchAll = useCallback(async () => {
     let cancelled = false;
@@ -72,11 +72,10 @@ const Sales = () => {
       };
 
       console.log("Fetching data for event ID:", id);
-      const [eventRes, checkinRes, ticketBuyersRes, payoutsRes] = await Promise.allSettled([
-        fetch(`http://localhost:5000/api/events/${id}`, { headers }),
-        fetch(`http://localhost:5000/api/events/${id}/checkins`, { headers }),
-        fetch(`http://localhost:5000/api/events/${id}/ticket-buyers`, { headers }),
-        fetch(`http://localhost:5000/api/events/${id}/payouts`, { headers }),
+      const [eventRes, checkinRes, ticketBuyersRes] = await Promise.allSettled([
+        fetch(`https://genpay-sl25bd-1.onrender.com/api/events/${id}`, { headers }),
+        fetch(`https://genpay-sl25bd-1.onrender.com/api/events/${id}/checkins`, { headers }),
+        fetch(`https://genpay-sl25bd-1.onrender.com/api/events/${id}/ticket-buyers`, { headers }),
       ]);
 
       if (cancelled) return;
@@ -110,17 +109,6 @@ const Sales = () => {
         console.warn("Ticket buyers fetch failed, status:", ticketBuyersRes.status, ticketBuyersRes.value?.status);
         setGuests([]);
       }
-
-      if (payoutsRes.status === "fulfilled" && payoutsRes.value.ok) {
-        const data = await payoutsRes.value.json();
-        console.log("Payouts response:", data);
-        const rows = data?.data?.payouts || data?.payouts || [];
-        setPayouts(rows);
-      } else {
-        console.warn("Payouts fetch failed, status:", payoutsRes.status, payoutsRes.value?.status);
-        setPayouts([]);
-        setError("Payouts data unavailable. Please check the backend configuration.");
-      }
     } catch (err) {
       console.error("Fetch error:", err);
       if (!cancelled) setError(err.message || "Failed to load sales data.");
@@ -149,7 +137,7 @@ const Sales = () => {
         }
         const cleanQuery = query.trim();
         console.log("Searching for:", cleanQuery, "Event ID:", id);
-        const response = await fetch(`http://localhost:5000/api/events/${id}/search-ticket`, {
+        const response = await fetch(`https://genpay-sl25bd-1.onrender.com/api/events/${id}/search-ticket`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -189,7 +177,7 @@ const Sales = () => {
       }
 
       console.log("Checking in ticket:", ticketId, "for event:", id);
-      const response = await fetch(`http://localhost:5000/api/events/${id}/check-in-ticket`, {
+      const response = await fetch(`https://genpay-sl25bd-1.onrender.com/api/events/${id}/check-in-ticket`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -202,13 +190,12 @@ const Sales = () => {
       console.log("Check-in response:", result);
       if (result.status === "success") {
         setError("");
-        // Update search results to reflect checked-in status
         setSearchResults((prev) =>
           prev.map((ticket) =>
             ticket.id === ticketId ? { ...ticket, status: "used", usedAt: result.data.ticket.usedAt } : ticket
           )
         );
-        fetchAll(); // Refresh guest list and check-ins
+        fetchAll();
       } else {
         setError(result.message || "Failed to check in ticket");
       }
@@ -219,6 +206,23 @@ const Sales = () => {
       setSearchLoading(false);
     }
   }, [id, fetchAll]);
+
+  const handleCloseDropdown = useCallback(() => {
+    setSearchResults([]);
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        handleCloseDropdown();
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [handleCloseDropdown]);
 
   useEffect(() => {
     debouncedSearch(searchInput);
@@ -275,7 +279,7 @@ const Sales = () => {
         >
           <Info className="h-5 w-5" />
           <span className="text-sm sm:text-base" style={{ fontFamily: '"Poppins", sans-serif' }}>
-            Manage your guest check-ins & payout summary here
+            Manage your guest check-ins here
           </span>
         </div>
 
@@ -303,7 +307,19 @@ const Sales = () => {
           />
           {searchLoading && <p className="text-gray-400 text-sm mt-2">Searching...</p>}
           {searchResults.length > 0 && (
-            <div className="absolute z-10 w-full mt-2 rounded-lg bg-white/10 backdrop-blur-sm max-h-60 overflow-y-auto">
+            <div
+              ref={dropdownRef}
+              className="absolute z-10 w-full mt-2 rounded-lg bg-white/10 backdrop-blur-sm max-h-60 overflow-y-auto"
+            >
+              <div className="flex justify-end p-2">
+                <button
+                  onClick={handleCloseDropdown}
+                  className="p-1 rounded-full bg-white/20 hover:bg-white/30 transition-colors"
+                  aria-label="Close search results"
+                >
+                  <X className="h-4 w-4 text-white" />
+                </button>
+              </div>
               {searchResults.map((result, idx) => (
                 <div
                   key={idx}
@@ -423,44 +439,6 @@ const Sales = () => {
                   <tr>
                     <td colSpan={5} className="px-4 py-6 text-center text-gray-400">
                       No guests found.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-        <section className="mt-8">
-          <h2 className="text-lg sm:text-xl font-semibold mb-3" style={{ fontFamily: '"Poppins", sans-serif' }}>
-            Your Payout Summary
-          </h2>
-          <div
-            className="w-full overflow-x-auto rounded-xl p-0 ring-1 bg-white/5"
-            style={{ border: "1px solid rgba(255, 0, 0, 0.4)" }}
-          >
-            <table className="w-full text-left text-sm">
-              <thead>
-                <tr className="text-gray-300 border-b border-white/10">
-                  <th className="px-4 py-3 font-medium">Date</th>
-                  <th className="px-4 py-3 font-medium">Time</th>
-                  <th className="px-4 py-3 font-medium">Account</th>
-                  <th className="px-4 py-3 font-medium">Amount</th>
-                </tr>
-              </thead>
-              <tbody>
-                {payouts.map((p, idx) => (
-                  <tr key={idx} className="border-b border-white/10 last:border-none">
-                    <td className="px-4 py-3 text-white/90">{formatDate(p.dateTime)}</td>
-                    <td className="px-4 py-3 text-white/90">{formatTime(p.dateTime)}</td>
-                    <td className="px-4 py-3 text-white/90">{p.account || "—"}</td>
-                    <td className="px-4 py-3 text-white/90">{formatNaira(p.amount)}</td>
-                  </tr>
-                ))}
-                {payouts.length === 0 && (
-                  <tr>
-                    <td colSpan={4} className="px-4 py-6 text-center text-gray-400">
-                      No payouts recorded.
                     </td>
                   </tr>
                 )}

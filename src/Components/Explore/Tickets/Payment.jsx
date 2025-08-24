@@ -1,6 +1,5 @@
-// Components/PaymentPage.js
 import React, { useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { PaystackButton } from 'react-paystack';
 import { ArrowLeft, AlertTriangle } from 'lucide-react';
 
@@ -26,6 +25,7 @@ const Payment = () => {
   const publicKey = import.meta.env.VITE_PAYSTACK_PUBLIC_KEY;
 
   const [paystackChecked, setPaystackChecked] = useState(true);
+  const [termsAgreed, setTermsAgreed] = useState(false);
 
   const paystackConfig = {
     reference: new Date().getTime().toString(),
@@ -87,7 +87,7 @@ const Payment = () => {
             total,
             provider: 'paystack',
             reference: reference.trxref,
-            tickets: data.data.tickets, // Include purchased tickets with QR codes
+            tickets: data.data.tickets,
           },
         });
       } else {
@@ -168,6 +168,33 @@ const Payment = () => {
               </span>
             </label>
 
+            <label className="flex items-start gap-3 cursor-pointer select-none mt-4">
+              <input
+                type="checkbox"
+                className="mt-1.5 accent-pink-600"
+                checked={termsAgreed}
+                onChange={(e) => setTermsAgreed(e.target.checked)}
+              />
+              <span className="text-white/90" style={{ fontFamily: '"Poppins", sans-serif' }}>
+                I agree to the{' '}
+                <Link
+                  to="/legal"
+                  className="text-pink-400 hover:text-pink-300 underline underline-offset-2"
+                  style={{ fontFamily: '"Poppins", sans-serif' }}
+                >
+                  Terms and Conditions
+                </Link>{' '}
+                and{' '}
+                <Link
+                  to="/legal/refund-policy"
+                  className="text-pink-400 hover:text-pink-300 underline underline-offset-2"
+                  style={{ fontFamily: '"Poppins", sans-serif' }}
+                >
+                  Refund Policy
+                </Link>
+              </span>
+            </label>
+
             <div className="mt-8 flex items-start gap-3">
               <div
                 className="h-9 w-9 rounded-md flex items-center justify-center"
@@ -180,13 +207,15 @@ const Payment = () => {
               </p>
             </div>
 
-            {(!paystackChecked || total <= 0 || !publicKey) && (
+            {(!paystackChecked || total <= 0 || !publicKey || !termsAgreed) && (
               <p className="text-red-400 mt-4">
                 {total <= 0
                   ? 'Please select at least one ticket to proceed.'
                   : !publicKey
                   ? 'Payment configuration error. Please try again later.'
-                  : 'Please select Paystack to proceed.'}
+                  : !paystackChecked
+                  ? 'Please select Paystack to proceed.'
+                  : 'Please agree to the Terms and Conditions and Refund Policy to proceed.'}
               </p>
             )}
 
@@ -194,10 +223,14 @@ const Payment = () => {
               {...paystackConfig}
               text={`Pay ${formatNaira(total)}`}
               className="w-full mt-5 rounded-full px-6 py-3 font-medium text-white hover:opacity-90 transition disabled:opacity-40"
-              style={{ background: 'linear-gradient(135deg, #A228AF 0%, #FF0000 100%)' }}
+              style={{
+                background: 'linear-gradient(90deg, #A228AF 0%, #FF0000 100%)',
+                fontFamily: '"Poppins", sans-serif',
+                borderRadius: '10px 10px 10px 0px',
+              }}
               onSuccess={handlePaystackSuccess}
               onClose={handlePaystackClose}
-              disabled={!paystackChecked || total <= 0 || !publicKey}
+              disabled={!paystackChecked || total <= 0 || !publicKey || !termsAgreed}
             />
           </section>
 

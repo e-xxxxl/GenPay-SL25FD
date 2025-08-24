@@ -46,13 +46,13 @@ const Navbar = () => {
             Home
           </a>
           </Link>
-          <a
-            href="#"
+          <Link
+            to="/explore"
             className="text-white hover:text-gray-300 transition-colors"
             style={{ fontFamily: '"Poppins", sans-serif' }}
           >
             Explore
-          </a>
+          </Link>
           <div className="relative">
             <button
               onClick={() => setIsGenpayDropdownOpen(!isGenpayDropdownOpen)}
@@ -128,13 +128,13 @@ const Navbar = () => {
               Home
             </a>
             </Link>
-            <a
-              href="#"
+            <Link
+              to="/explore"
               className="block text-gray-400 hover:text-white py-2"
               style={{ fontFamily: '"Poppins", sans-serif' }}
             >
               Explore
-            </a>
+            </Link>
             <div className="py-2">
               <button
                 onClick={() => setIsGenpayDropdownOpen(!isGenpayDropdownOpen)}
