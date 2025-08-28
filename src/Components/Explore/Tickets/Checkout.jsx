@@ -1,4 +1,3 @@
-// Components/CheckoutPage.js
 import React, { useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
@@ -31,43 +30,83 @@ const Checkout = () => {
     [itemsFromState]
   );
 
+  // Calculate total number of tickets
+  const totalTickets = items.reduce((sum, item) => sum + item.quantity, 0);
+
+  // Initialize forms for each ticket
+  const [ticketForms, setTicketForms] = useState(
+    Array(totalTickets)
+      .fill()
+      .map(() => ({
+        firstName: '',
+        lastName: '',
+        email: '',
+        phone: '',
+        location: '',
+      }))
+  );
+
+  const [emailErrors, setEmailErrors] = useState(Array(totalTickets).fill(''));
+
   const formatNaira = (n) => `₦${Number(n || 0).toLocaleString('en-NG')}`;
 
-  const [form, setForm] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone: '',
-    location: '',
-  });
-
-  const [emailError, setEmailError] = useState('');
-
-  const onChange = (e) => {
+  const onChange = (index, e) => {
     const { name, value } = e.target;
-    setForm((f) => ({ ...f, [name]: value }));
+    setTicketForms((prev) =>
+      prev.map((form, i) =>
+        i === index ? { ...form, [name]: value } : form
+      )
+    );
+
     if (name === 'email') {
       const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
-      setEmailError(isValidEmail || !value ? '' : 'Please enter a valid email address');
+      setEmailErrors((prev) =>
+        prev.map((err, i) =>
+          i === index ? (isValidEmail || !value ? '' : 'Please enter a valid email address') : err
+        )
+      );
     }
   };
 
-  const canProceed =
-    form.firstName.trim() &&
-    form.lastName.trim() &&
-    form.email.trim() &&
-    !emailError &&
-    form.phone.trim() &&
-    form.location.trim() &&
-    total > 0;
+  const canProceed = ticketForms.every(
+    (form, index) =>
+      form.firstName.trim() &&
+      form.lastName.trim() &&
+      form.email.trim() &&
+      !emailErrors[index] &&
+      form.phone.trim() &&
+      form.location.trim()
+  ) && total > 0;
 
   const handleProceed = () => {
     if (!canProceed) return;
-    console.log('Checkout proceeding to payment:', { event, customer: form, items, subtotal, fees, total });
+
+    // Map ticket forms to tickets, associating each form with a ticket
+    const ticketAssignments = [];
+    let formIndex = 0;
+    items.forEach((item) => {
+      for (let i = 0; i < item.quantity; i++) {
+        ticketAssignments.push({
+          ticketId: item.id,
+          customer: ticketForms[formIndex],
+        });
+        formIndex++;
+      }
+    });
+
+    console.log('Checkout proceeding to payment:', {
+      event,
+      tickets: ticketAssignments,
+      items,
+      subtotal,
+      fees,
+      total,
+    });
+
     navigate('/checkout/payment', {
       state: {
         event,
-        customer: form,
+        tickets: ticketAssignments,
         items,
         subtotal,
         fees,
@@ -108,74 +147,100 @@ const Checkout = () => {
               Checkout
             </h1>
 
-            <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
-              <div>
-                <label htmlFor="firstName" className="sr-only">First Name</label>
-                <input
-                  id="firstName"
-                  name="firstName"
-                  type="text"
-                  placeholder="First Name"
-                  value={form.firstName}
-                  onChange={onChange}
-                  className="w-full rounded-full bg-transparent border border-white/20 px-4 py-3 text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-pink-600"
-                  style={{ fontFamily: '"Poppins", sans-serif' }}
-                />
-              </div>
-              <div>
-                <label htmlFor="lastName" className="sr-only">Last Name</label>
-                <input
-                  id="lastName"
-                  name="lastName"
-                  type="text"
-                  placeholder="Last Name"
-                  value={form.lastName}
-                  onChange={onChange}
-                  className="w-full rounded-full bg-transparent border border-white/20 px-4 py-3 text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-pink-600"
-                  style={{ fontFamily: '"Poppins", sans-serif' }}
-                />
-              </div>
-              <div>
-                <label htmlFor="email" className="sr-only">Email Address</label>
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  placeholder="Email Address"
-                  value={form.email}
-                  onChange={onChange}
-                  className={`w-full rounded-full bg-transparent border border-white/20 px-4 py-3 text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-pink-600 ${emailError ? 'border-red-400' : ''}`}
-                  style={{ fontFamily: '"Poppins", sans-serif' }}
-                />
-                {emailError && <p className="text-red-400 text-sm mt-1">{emailError}</p>}
-              </div>
-              <div>
-                <label htmlFor="phone" className="sr-only">Phone Number</label>
-                <input
-                  id="phone"
-                  name="phone"
-                  type="tel"
-                  placeholder="Phone Number"
-                  value={form.phone}
-                  onChange={onChange}
-                  className="w-full rounded-full bg-transparent border border-white/20 px-4 py-3 text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-pink-600"
-                  style={{ fontFamily: '"Poppins", sans-serif' }}
-                />
-              </div>
-              <div>
-                <label htmlFor="location" className="sr-only">Location</label>
-                <input
-                  id="location"
-                  name="location"
-                  type="text"
-                  placeholder="Location"
-                  value={form.location}
-                  onChange={onChange}
-                  className="w-full rounded-full bg-transparent border border-white/20 px-4 py-3 text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-pink-600"
-                  style={{ fontFamily: '"Poppins", sans-serif' }}
-                />
-              </div>
-            </form>
+            <div className="space-y-8">
+              {ticketForms.map((form, index) => (
+                <div key={index} className="border border-white/20 p-6 rounded-lg">
+                  <h2
+                    className="text-xl font-semibold mb-4"
+                    style={{ fontFamily: '"Poppins", sans-serif' }}
+                  >
+                    Ticket {index + 1} Attendee Information
+                  </h2>
+                  <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
+                    <div>
+                      <label htmlFor={`firstName-${index}`} className="sr-only">
+                        First Name
+                      </label>
+                      <input
+                        id={`firstName-${index}`}
+                        name="firstName"
+                        type="text"
+                        placeholder="First Name"
+                        value={form.firstName}
+                        onChange={(e) => onChange(index, e)}
+                        className="w-full rounded-full bg-transparent border border-white/20 px-4 py-3 text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-pink-600"
+                        style={{ fontFamily: '"Poppins", sans-serif' }}
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor={`lastName-${index}`} className="sr-only">
+                        Last Name
+                      </label>
+                      <input
+                        id={`lastName-${index}`}
+                        name="lastName"
+                        type="text"
+                        placeholder="Last Name"
+                        value={form.lastName}
+                        onChange={(e) => onChange(index, e)}
+                        className="w-full rounded-full bg-transparent border border-white/20 px-4 py-3 text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-pink-600"
+                        style={{ fontFamily: '"Poppins", sans-serif' }}
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor={`email-${index}`} className="sr-only">
+                        Email Address
+                      </label>
+                      <input
+                        id={`email-${index}`}
+                        name="email"
+                        type="email"
+                        placeholder="Email Address"
+                        value={form.email}
+                        onChange={(e) => onChange(index, e)}
+                        className={`w-full rounded-full bg-transparent border border-white/20 px-4 py-3 text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-pink-600 ${
+                          emailErrors[index] ? 'border-red-400' : ''
+                        }`}
+                        style={{ fontFamily: '"Poppins", sans-serif' }}
+                      />
+                      {emailErrors[index] && (
+                        <p className="text-red-400 text-sm mt-1">{emailErrors[index]}</p>
+                      )}
+                    </div>
+                    <div>
+                      <label htmlFor={`phone-${index}`} className="sr-only">
+                        Phone Number
+                      </label>
+                      <input
+                        id={`phone-${index}`}
+                        name="phone"
+                        type="tel"
+                        placeholder="Phone Number"
+                        value={form.phone}
+                        onChange={(e) => onChange(index, e)}
+                        className="w-full rounded-full bg-transparent border border-white/20 px-4 py-3 text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-pink-600"
+                        style={{ fontFamily: '"Poppins", sans-serif' }}
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor={`location-${index}`} className="sr-only">
+                        Location
+                      </label>
+                      <input
+                        id={`location-${index}`}
+                        name="location"
+                        type="text"
+                        placeholder="Location"
+                        value={form.location}
+                        onChange={(e) => onChange(index, e)}
+                        className="w-full rounded-full bg-transparent border border-white/20 px-4 py-3 text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-pink-600"
+                        style={{ fontFamily: '"Poppins", sans-serif' }}
+                      />
+                    </div>
+                  </form>
+                </div>
+              ))}
+            </div>
           </section>
 
           <aside className="lg:pl-6">

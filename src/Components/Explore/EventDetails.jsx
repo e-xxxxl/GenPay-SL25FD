@@ -1,79 +1,121 @@
 import React, { useMemo, useState, useEffect, useCallback } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, MapPin, Calendar, Clock, Ticket, Instagram, Twitter, X, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const EventDetails = () => {
   const { state } = useLocation();
+  const { eventName } = useParams();
   const navigate = useNavigate();
-  const event = state?.event;
+  const [event, setEvent] = useState(state?.event || null);
+  const [loading, setLoading] = useState(!state?.event);
+  const [error, setError] = useState(null);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [currentIndex, setCurrentIndex] = useState(0);
 
-  if (!event) {
+  // Fetch event if state.event is missing
+  useEffect(() => {
+    if (event || !eventName) return;
+
+    const fetchEvent = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        console.log('Fetching event:', `http://localhost:5000/api/events/public/slug/${eventName}`);
+        const response = await fetch(`http://localhost:5000/api/events/public/slug/${eventName}`, {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`HTTP error! status: ${response.status}, ${errorText}`);
+        }
+
+        const data = await response.json();
+        console.log('Backend response:', data);
+
+        if (data.status !== 'success' || !data.data.event) {
+          throw new Error('Event not found or invalid response format');
+        }
+
+        const formattedEvent = {
+          _id: data.data.event._id.toString(),
+          title: data.data.event.eventName,
+          description: data.data.event.eventDescription,
+          date: data.data.event.startDateTime,
+          startISO: data.data.event.startDateTime,
+          location: data.data.event.eventLocation?.venue || 'Unknown Location',
+          image: data.data.event.headerImage || 'https://via.placeholder.com/1080x1350?text=Event+Flyer',
+          category: data.data.event.eventCategory,
+          images: Array.isArray(data.data.event.images) ? data.data.event.images : [],
+          socialLinks: data.data.event.socialLinks || {},
+          tickets: Array.isArray(data.data.event.tickets) ? data.data.event.tickets : [],
+          eventName: data.data.event.eventName,
+          eventDescription: data.data.event.eventDescription,
+          startDateTime: data.data.event.startDateTime,
+          endDateTime: data.data.event.endDateTime,
+          eventLocation: data.data.event.eventLocation || {},
+          eventUrl: data.data.event.eventUrl || '',
+          headerImage: data.data.event.headerImage,
+          attendeesCount: data.data.event.attendeesCount ?? 0,
+        };
+
+        setEvent(formattedEvent);
+      } catch (err) {
+        console.error('Error fetching event:', err);
+        setError(err.message || 'Failed to load event. Please try again.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEvent();
+  }, [eventName, event]);
+
+  // Early return for invalid eventName
+  if (!eventName) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center text-white text-xl">
-        Event not found. Please go back and select an event.
+        Invalid event URL. Please go back and select an event.
       </div>
     );
   }
 
-  // Normalize fields based on provided schema + previous mapping
-  const title = event.eventName || event.title || 'Event';
-  const description = event.eventDescription || event.description || 'No description available.';
-  const headerImage = event.headerImage || event.image || '/placeholder.svg?height=250&width=200';
-  const venue = event.eventLocation?.venue || event.location || 'Location TBA';
-  const locationTips = event.eventLocation?.locationTips || event.locationTips || '';
-  const address = event.eventLocation?.address || {};
-  const addressLine = [address.street, address.city, address.state, address.country, address.zipCode]
-    .filter(Boolean)
-    .join(', ');
+  // Normalize fields
+  const title = event ? event.eventName || event.title || 'Event' : 'Event';
+  const description = event ? event.eventDescription || event.description || 'No description available.' : 'No description available.';
+  const headerImage = event ? event.headerImage || event.image || '/placeholder.svg?height=250&width=200' : '/placeholder.svg?height=250&width=200';
+  const venue = event ? event.eventLocation?.venue || event.location || 'Location TBA' : 'Location TBA';
+  const locationTips = event ? event.eventLocation?.locationTips || '' : '';
+  const address = event ? event.eventLocation?.address || {} : {};
+  const addressLine = [address.street, address.city, address.state, address.country, address.zipCode].filter(Boolean).join(', ');
   const fullAddress = [venue, addressLine].filter(Boolean).join(', ');
+  const images = event ? (Array.isArray(event.images) ? event.images.slice(0, 10) : []) : [];
+  const social = event ? event.socialLinks || {} : {};
+  const eventUrl = event ? event.eventUrl || '' : '';
+  const attendees = event ? event.attendeesCount ?? 172 : 172;
 
-  const images = Array.isArray(event.images) ? event.images.slice(0, 10) : [];
-  const social = event.socialLinks || {};
-  const eventUrl = event.eventUrl || event.url || '';
-
-  // Date/time formatting using schema fields when available
-  const start = event.startDateTime ? new Date(event.startDateTime) : (event.date ? new Date(event.date) : null);
-  const end = event.endDateTime ? new Date(event.endDateTime) : (event.endDate ? new Date(event.endDate) : null);
-
+  // Date/time formatting
+  const start = event && event.startDateTime ? new Date(event.startDateTime) : (event && event.date ? new Date(event.date) : null);
+  const end = event && event.endDateTime ? new Date(event.endDateTime) : null;
   const formattedDate = start && !isNaN(start.getTime())
-    ? new Intl.DateTimeFormat('en-US', { month: 'long', day: 'numeric', year: 'numeric' }).format(start)
+    ? new Intl.DateTimeFormat('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'Africa/Lagos' }).format(start)
     : 'N/A';
-
   const formattedStartTime = start && !isNaN(start.getTime())
-    ? new Intl.DateTimeFormat('en-US', { hour: 'numeric', minute: 'numeric', hour12: true }).format(start)
+    ? new Intl.DateTimeFormat('en-US', { hour: 'numeric', minute: 'numeric', hour12: true, timeZone: 'Africa/Lagos' }).format(start)
     : 'N/A';
-
   const formattedEndTime = end && !isNaN(end.getTime())
-    ? new Intl.DateTimeFormat('en-US', { hour: 'numeric', minute: 'numeric', hour12: true }).format(end)
+    ? new Intl.DateTimeFormat('en-US', { hour: 'numeric', minute: 'numeric', hour12: true, timeZone: 'Africa/Lagos' }).format(end)
     : 'N/A';
-
   const sanitizedTitle = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/-+/g, '-').trim();
 
-  // Map embed (no API key required)
+  // Map embed
   const mapSrc = useMemo(() => {
     const query = encodeURIComponent(fullAddress || venue);
     return `https://www.google.com/maps?q=${query}&output=embed`;
   }, [fullAddress, venue]);
 
-  const attendees = event.attendeesCount ?? 172;
-
-  const StatRow = ({ icon: Icon, children }) => (
-    <div className="flex items-center gap-3">
-      <div
-        className="h-9 w-9 rounded-full flex items-center justify-center"
-        style={{ background: 'linear-gradient(135deg, #A228AF 0%, #FF0000 100%)' }}
-        aria-hidden
-      >
-        <Icon className="h-5 w-5 text-white" />
-      </div>
-      <div className="text-white/90">{children}</div>
-    </div>
-  );
-
-  // Lightbox / Carousel state
-  const [lightboxOpen, setLightboxOpen] = useState(false);
-  const [currentIndex, setCurrentIndex] = useState(0);
-
+  // Lightbox callbacks
   const openLightbox = useCallback((index) => {
     setCurrentIndex(index);
     setLightboxOpen(true);
@@ -101,24 +143,52 @@ const EventDetails = () => {
     return () => window.removeEventListener('keydown', onKey);
   }, [lightboxOpen, closeLightbox, showPrev, showNext]);
 
-  // Navigate to BuyTicket component
+  // Navigate to BuyTicket
   const handleGetTickets = () => {
-    if (event._id) {
+    if (event?._id) {
       navigate(`/buy-ticket/${event._id}`, { state: { event } });
     } else {
       console.error('Event ID is missing');
-      // Optionally, show a user-friendly error or fallback
+      alert('Unable to proceed to ticket purchase. Please try again.');
     }
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center text-white text-xl">
+        Loading event...
+      </div>
+    );
+  }
+
+  if (error || !event) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center text-white text-xl">
+        Event not found. Please go back and select an event.
+      </div>
+    );
+  }
+
+  const StatRow = ({ icon: Icon, children }) => (
+    <div className="flex items-center gap-3">
+      <div
+        className="h-9 w-9 rounded-full flex items-center justify-center"
+        style={{ background: 'linear-gradient(135deg, #A228AF 0%, #FF0000 100%)' }}
+        aria-hidden
+      >
+        <Icon className="h-5 w-5 text-white" />
+      </div>
+      <div className="text-white/90">{children}</div>
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-black text-white">
-      {/* Header */}
       <header className="flex items-center gap-3 p-5">
         <button
-          onClick={() => navigate(-1)}
+          onClick={() => navigate('/explore')}
           className="flex items-center justify-center h-9 w-9 rounded-full bg-white/5 hover:bg-white/10 transition-colors"
-          aria-label="Go back"
+          aria-label="Go back to Explore"
         >
           <ArrowLeft className="h-5 w-5 text-white" />
         </button>
@@ -136,7 +206,6 @@ const EventDetails = () => {
       </header>
 
       <main className="mx-auto w-full max-w-3xl px-4 pb-14 space-y-10">
-        {/* Hero: description left, image right */}
         <section className="relative">
           <div
             className="rounded-2xl p-4 sm:p-5 shadow-xl"
@@ -144,6 +213,12 @@ const EventDetails = () => {
           >
             <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-4 items-center">
               <div className="space-y-3 order-2 sm:order-1">
+                <h1
+                  className="text-2xl sm:text-3xl font-bold"
+                  style={{ fontFamily: '"Poppins", sans-serif' }}
+                >
+                  {title}
+                </h1>
                 <p className="text-sm leading-relaxed text-white/90">
                   {description}
                 </p>
@@ -151,7 +226,7 @@ const EventDetails = () => {
 
               <div className="order-1 sm:order-2 flex justify-start sm:justify-end">
                 <img
-                  src={headerImage || "/placeholder.svg"}
+                  src={headerImage}
                   alt={title}
                   width={200}
                   height={250}
@@ -162,7 +237,6 @@ const EventDetails = () => {
           </div>
         </section>
 
-        {/* Event Details + Map */}
         <section className="grid md:grid-cols-2 gap-6 sm:gap-8">
           <div className="space-y-5">
             <h2
@@ -223,7 +297,6 @@ const EventDetails = () => {
           </div>
         </section>
 
-        {/* Gallery */}
         {images.length > 0 && (
           <section className="space-y-4">
             <h2
@@ -254,7 +327,6 @@ const EventDetails = () => {
           </section>
         )}
 
-        {/* Social */}
         {social && Object.values(social).some(Boolean) && (
           <section className="space-y-4">
             <h2
@@ -269,7 +341,7 @@ const EventDetails = () => {
                   href={social.tiktok}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="h-10 w-10 rounded-full bg-white/5 hover:bg_white/10 text-white flex items-center justify-center transition"
+                  className="h-10 w-10 rounded-full bg-white/5 hover:bg-white/10 text-white flex items-center justify-center transition"
                   aria-label="TikTok"
                   title="TikTok"
                 >
@@ -281,7 +353,7 @@ const EventDetails = () => {
                   href={social.snapchat}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="h-10 w-10 rounded-full bg-white/5 hover:bg_white/10 text-white flex items-center justify-center transition"
+                  className="h-10 w-10 rounded-full bg-white/5 hover:bg-white/10 text-white flex items-center justify-center transition"
                   aria-label="Snapchat"
                   title="Snapchat"
                 >
@@ -354,7 +426,6 @@ const EventDetails = () => {
         <hr className="border-white/10" />
       </main>
 
-      {/* Lightbox / Carousel */}
       {lightboxOpen && images.length > 0 && (
         <div
           className="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm flex items-center justify-center p-4"

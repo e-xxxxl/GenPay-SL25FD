@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { PaystackButton } from 'react-paystack';
-import { ArrowLeft, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, AlertTriangle, Loader2 } from 'lucide-react';
 
 const Payment = () => {
   const { state } = useLocation();
   const navigate = useNavigate();
 
   const event = state?.event ?? null;
-  const customer = state?.customer ?? {};
+  const tickets = Array.isArray(state?.tickets) ? state.tickets : [];
   const items = Array.isArray(state?.items) ? state.items : [];
   const subtotal = typeof state?.subtotal === 'number' ? state.subtotal : 0;
   const fees = typeof state?.fees === 'number' ? state.fees : 0;
@@ -26,10 +26,13 @@ const Payment = () => {
 
   const [paystackChecked, setPaystackChecked] = useState(true);
   const [termsAgreed, setTermsAgreed] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  const primaryCustomer = tickets.length > 0 ? tickets[0].customer : {};
 
   const paystackConfig = {
     reference: new Date().getTime().toString(),
-    email: customer.email || 'default@example.com',
+    email: primaryCustomer.email || 'default@example.com',
     amount: total * 100,
     publicKey,
     metadata: {
@@ -37,12 +40,12 @@ const Payment = () => {
         {
           display_name: 'Full Name',
           variable_name: 'full_name',
-          value: `${customer.firstName} ${customer.lastName}` || 'Customer',
+          value: `${primaryCustomer.firstName || 'Customer'} ${primaryCustomer.lastName || ''}`,
         },
         {
           display_name: 'Phone',
           variable_name: 'phone',
-          value: customer.phone || 'N/A',
+          value: primaryCustomer.phone || 'N/A',
         },
         {
           display_name: 'Event',
@@ -53,59 +56,81 @@ const Payment = () => {
     },
   };
 
-  console.log('Payment component state:', { event, customer, items, subtotal, fees, total, paystackChecked, publicKey });
+  console.log('Payment component state:', {
+    event,
+    tickets,
+    items,
+    subtotal,
+    fees,
+    total,
+    paystackChecked,
+    publicKey,
+  });
 
-  const handlePaystackSuccess = async (reference) => {
+  const handlePaystackSuccess = async (response) => {
     try {
-      const response = await fetch(`https://genpay-sl25bd-1.onrender.com/api/events/${event._id}/purchase-ticket`, {
+      setIsProcessing(true);
+      console.log('Paystack success response:', response);
+      const reference = response.reference || response.trxref;
+      const apiResponse = await fetch(`http://localhost:5000/api/events/${event._id}/purchase-ticket`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           eventId: event._id,
-          tickets: items.map((it) => ({ ticketId: it.id, quantity: it.quantity })),
-          customer: {
-            firstName: customer.firstName,
-            lastName: customer.lastName,
-            email: customer.email,
-            phone: customer.phone,
-            location: customer.location,
-          },
+          tickets: tickets.map((t) => ({
+            ticketId: t.ticketId,
+            quantity: 1,
+            customer: {
+              firstName: t.customer.firstName,
+              lastName: t.customer.lastName,
+              email: t.customer.email,
+              phone: t.customer.phone,
+              location: t.customer.location,
+            },
+          })),
+          reference,
+          fees, // Include fees in the request
         }),
       });
 
-      const data = await response.json();
+      const data = await apiResponse.json();
+      console.log('Purchase ticket API response:', data);
+
       if (data.status === 'success') {
         navigate('/checkout/success', {
           state: {
             event,
-            customer,
+            tickets: data.data.tickets,
             items,
             subtotal,
             fees,
             total,
             provider: 'paystack',
-            reference: reference.trxref,
-            tickets: data.data.tickets,
+            reference,
+            transaction: data.data.transaction, // Pass transaction data
           },
         });
       } else {
         console.error('Ticket purchase failed:', data.message);
         alert('Failed to purchase tickets: ' + data.message);
+        setIsProcessing(false);
       }
     } catch (error) {
       console.error('Error purchasing tickets:', error);
       alert('An error occurred while processing your purchase.');
+      setIsProcessing(false);
     }
   };
 
   const handlePaystackClose = () => {
     console.log('Payment closed');
     alert('Payment was not completed. Please try again.');
+    setIsProcessing(false);
   };
 
-  if (!event || !customer.email || !items.length || total <= 0) {
+  if (!event || !tickets.length || tickets.some((t) => !t.customer.email) || !items.length || total <= 0) {
     return (
       <div className="min-h-screen bg-black text-white flex items-center justify-center">
         <p className="text-red-400">
@@ -122,6 +147,7 @@ const Payment = () => {
           onClick={() => navigate(-1)}
           className="flex items-center justify-center h-9 w-9 rounded-full bg-white/5 hover:bg-white/10 transition-colors"
           aria-label="Go back"
+          disabled={isProcessing}
         >
           <ArrowLeft className="h-5 w-5 text-white" />
         </button>
@@ -139,13 +165,20 @@ const Payment = () => {
 
       <main className="mx-auto w-full max-w-5xl px-4 pb-16">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-          <section>
+          <section className={isProcessing ? 'opacity-50 pointer-events-none' : ''}>
             <h1
               className="text-2xl sm:text-3xl font-semibold mb-6"
               style={{ fontFamily: '"Poppins", sans-serif' }}
             >
               Payment
             </h1>
+
+            {isProcessing && (
+              <div className="flex items-center gap-3 mb-4">
+                <Loader2 className="h-6 w-6 animate-spin text-pink-600" />
+                <p className="text-gray-300">Processing your purchase, please wait...</p>
+              </div>
+            )}
 
             <label className="flex items-start gap-3 cursor-pointer select-none">
               <input
@@ -154,6 +187,7 @@ const Payment = () => {
                 className="mt-1.5 accent-pink-600"
                 checked={paystackChecked}
                 onChange={() => setPaystackChecked(true)}
+                disabled={isProcessing}
               />
               <span className="text-white/90">
                 I want to make payment with{' '}
@@ -174,6 +208,7 @@ const Payment = () => {
                 className="mt-1.5 accent-pink-600"
                 checked={termsAgreed}
                 onChange={(e) => setTermsAgreed(e.target.checked)}
+                disabled={isProcessing}
               />
               <span className="text-white/90" style={{ fontFamily: '"Poppins", sans-serif' }}>
                 I agree to the{' '}
@@ -207,7 +242,19 @@ const Payment = () => {
               </p>
             </div>
 
-            {(!paystackChecked || total <= 0 || !publicKey || !termsAgreed) && (
+            <div className="mt-4 flex items-start gap-3">
+              <div
+                className="h-9 w-9 rounded-md flex items-center justify-center"
+                style={{ background: 'linear-gradient(135deg, #A228AF 0%, #FF0000 100%)' }}
+              >
+                <span className="text-white font-semibold">!</span>
+              </div>
+              <p className="text-sm text-gray-300 leading-relaxed max-w-sm">
+                The payment will be processed using the email <strong>{primaryCustomer.email || 'N/A'}</strong>. Tickets will be sent to the individual email addresses provided for each attendee.
+              </p>
+            </div>
+
+            {(!paystackChecked || total <= 0 || !publicKey || !termsAgreed) && !isProcessing && (
               <p className="text-red-400 mt-4">
                 {total <= 0
                   ? 'Please select at least one ticket to proceed.'
@@ -221,7 +268,7 @@ const Payment = () => {
 
             <PaystackButton
               {...paystackConfig}
-              text={`Pay ${formatNaira(total)}`}
+              text={isProcessing ? 'Processing...' : `Pay ${formatNaira(total)}`}
               className="w-full mt-5 rounded-full px-6 py-3 font-medium text-white hover:opacity-90 transition disabled:opacity-40"
               style={{
                 background: 'linear-gradient(90deg, #A228AF 0%, #FF0000 100%)',
@@ -230,7 +277,7 @@ const Payment = () => {
               }}
               onSuccess={handlePaystackSuccess}
               onClose={handlePaystackClose}
-              disabled={!paystackChecked || total <= 0 || !publicKey || !termsAgreed}
+              disabled={!paystackChecked || total <= 0 || !publicKey || !termsAgreed || isProcessing}
             />
           </section>
 

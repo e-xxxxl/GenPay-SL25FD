@@ -11,6 +11,7 @@ const SecondSection = ({ activeTab = "Dashboard", onTabChange }) => {
     { id: "event", label: "Event", path: "/dashboard" },
     { id: "shop", label: "Shop", path: "/shop" },
     { id: "account", label: "Account", path: "/account" },
+    { id: "wallet", label: "Wallet", path: "/wallet" },
     { id: "logs", label: "Report Issue", path: "/reportissue" }
   ]
 

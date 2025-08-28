@@ -73,9 +73,9 @@ const Sales = () => {
 
       console.log("Fetching data for event ID:", id);
       const [eventRes, checkinRes, ticketBuyersRes] = await Promise.allSettled([
-        fetch(`https://genpay-sl25bd-1.onrender.com/api/events/${id}`, { headers }),
-        fetch(`https://genpay-sl25bd-1.onrender.com/api/events/${id}/checkins`, { headers }),
-        fetch(`https://genpay-sl25bd-1.onrender.com/api/events/${id}/ticket-buyers`, { headers }),
+        fetch(`http://localhost:5000/api/events/${id}`, { headers }),
+        fetch(`http://localhost:5000/api/events/${id}/checkins`, { headers }),
+        fetch(`http://localhost:5000/api/events/${id}/ticket-buyers`, { headers }),
       ]);
 
       if (cancelled) return;
@@ -137,7 +137,7 @@ const Sales = () => {
         }
         const cleanQuery = query.trim();
         console.log("Searching for:", cleanQuery, "Event ID:", id);
-        const response = await fetch(`https://genpay-sl25bd-1.onrender.com/api/events/${id}/search-ticket`, {
+        const response = await fetch(`http://localhost:5000/api/events/${id}/search-ticket`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -177,7 +177,7 @@ const Sales = () => {
       }
 
       console.log("Checking in ticket:", ticketId, "for event:", id);
-      const response = await fetch(`https://genpay-sl25bd-1.onrender.com/api/events/${id}/check-in-ticket`, {
+      const response = await fetch(`http://localhost:5000/api/events/${id}/check-in-ticket`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -327,11 +327,11 @@ const Sales = () => {
                   style={{ background: result.status === "valid" ? "rgba(34, 197, 94, 0.2)" : "rgba(239, 68, 68, 0.2)" }}
                 >
                   <p className="font-semibold">Ticket Status: {result.status.toUpperCase()}</p>
-                  <p>Owner: {result.owner.firstName} {result.owner.lastName}</p>
-                  <p>Email: {result.owner.email}</p>
+                  <p>Owner: {result.buyer.firstName} {result.buyer.lastName}</p>
+                  <p>Email: {result.buyer.email}</p>
                   <p>Ticket ID: {result.id}</p>
-                  {result.owner.phone && <p>Phone: {result.owner.phone}</p>}
-                  {result.owner.location && <p>Location: {result.owner.location}</p>}
+                  {/* {result.buyer.phone && <p>Phone: {result.buyer.phone}</p>}
+                  {result.buyer.location && <p>Location: {result.buyer.location}</p>} */}
                   {result.status === "valid" && (
                     <button
                       onClick={() => handleCheckIn(result.id)}

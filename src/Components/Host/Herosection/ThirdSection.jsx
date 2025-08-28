@@ -35,7 +35,7 @@ const ThirdSection = ({ onCreateEvent }) => {
           throw new Error("No authentication token found");
         }
 
-        const response = await fetch("https://genpay-sl25bd-1.onrender.com/api/events", {
+        const response = await fetch("http://localhost:5000/api/events", {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -118,37 +118,39 @@ const ThirdSection = ({ onCreateEvent }) => {
   };
 
   const handleDeleteEvent = async (eventId) => {
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        throw new Error("No authentication token found");
-      }
-
-      const response = await fetch(`https://genpay-sl25bd-1.onrender.com/api/events/${eventId}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      if (data.status !== "success") {
-        throw new Error(data.message || "Failed to delete event");
-      }
-
-      // Remove the deleted event from the state
-      setEvents((prevEvents) => prevEvents.filter((event) => event.id !== eventId));
-      setDropdownEventId(null); // Close dropdown
-    } catch (err) {
-      console.error("Error deleting event:", err);
-      setError(err.message || "Failed to delete event");
+  try {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      throw new Error("No authentication token found");
     }
-  };
+
+    const response = await fetch(`http://localhost:5000/api/events/${eventId}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    if (data.status !== "success") {
+      throw new Error(data.message || "Failed to delete event");
+    }
+
+    // Remove the deleted event from the state
+    setEvents((prevEvents) => prevEvents.filter((event) => event.id !== eventId));
+    setDropdownEventId(null); // Close dropdown
+    setError(null); // Clear any previous errors
+  } catch (err) {
+    console.error("Error deleting event:", err);
+    setError(err.message || "Failed to delete event");
+  }
+};
 
   const categories = [
     "All",
@@ -186,6 +188,11 @@ const ThirdSection = ({ onCreateEvent }) => {
               </div>
             </div>
           </div>
+          {error && (
+  <div className="mb-6 p-4 bg-red-900/20 border border-red-500 rounded-lg text-red-400 text-sm" style={{ fontFamily: '"Poppins", sans-serif' }}>
+    {error}
+  </div>
+)}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {[...Array(6)].map((_, index) => (
               <div key={index} className="bg-gray-900 rounded-2xl overflow-hidden animate-pulse">
