@@ -1,4 +1,3 @@
-// Components/Host/Event/Sales.jsx
 "use client";
 
 import { useEffect, useMemo, useState, useCallback, useRef } from "react";
@@ -73,9 +72,9 @@ const Sales = () => {
 
       console.log("Fetching data for event ID:", id);
       const [eventRes, checkinRes, ticketBuyersRes] = await Promise.allSettled([
-        fetch(`https://genpay-sl25bd-1.onrender.com/api/events/${id}`, { headers }),
-        fetch(`https://genpay-sl25bd-1.onrender.com/api/events/${id}/checkins`, { headers }),
-        fetch(`https://genpay-sl25bd-1.onrender.com/api/events/${id}/ticket-buyers`, { headers }),
+        fetch(`http://localhost:5000/api/events/${id}`, { headers }),
+        fetch(`http://localhost:5000/api/events/${id}/checkins`, { headers }),
+        fetch(`http://localhost:5000/api/events/${id}/ticket-buyers`, { headers }),
       ]);
 
       if (cancelled) return;
@@ -104,7 +103,15 @@ const Sales = () => {
         const data = await ticketBuyersRes.value.json();
         console.log("Ticket buyers response:", data);
         const rows = data?.data?.guests || data?.guests || [];
-        setGuests(rows);
+        // Enhance guests data with groupSize if available
+        const enhancedGuests = rows.map((guest) => {
+          const ticket = (data?.data?.tickets || []).find((t) => t.buyer?._id === guest._id);
+          return {
+            ...guest,
+            groupSize: ticket?.groupSize || null,
+          };
+        });
+        setGuests(enhancedGuests);
       } else {
         console.warn("Ticket buyers fetch failed, status:", ticketBuyersRes.status, ticketBuyersRes.value?.status);
         setGuests([]);
@@ -137,7 +144,7 @@ const Sales = () => {
         }
         const cleanQuery = query.trim();
         console.log("Searching for:", cleanQuery, "Event ID:", id);
-        const response = await fetch(`https://genpay-sl25bd-1.onrender.com/api/events/${id}/search-ticket`, {
+        const response = await fetch(`http://localhost:5000/api/events/${id}/search-ticket`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -177,7 +184,7 @@ const Sales = () => {
       }
 
       console.log("Checking in ticket:", ticketId, "for event:", id);
-      const response = await fetch(`https://genpay-sl25bd-1.onrender.com/api/events/${id}/check-in-ticket`, {
+      const response = await fetch(`http://localhost:5000/api/events/${id}/check-in-ticket`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -330,8 +337,9 @@ const Sales = () => {
                   <p>Owner: {result.buyer.firstName} {result.buyer.lastName}</p>
                   <p>Email: {result.buyer.email}</p>
                   <p>Ticket ID: {result.id}</p>
-                  {/* {result.buyer.phone && <p>Phone: {result.buyer.phone}</p>}
-                  {result.buyer.location && <p>Location: {result.buyer.location}</p>} */}
+                  {result.groupSize && <p>Group Size: {result.groupSize} people</p>}
+                  {result.buyer.phone && <p>Phone: {result.buyer.phone}</p>}
+                  {result.buyer.location && <p>Location: {result.buyer.location}</p>}
                   {result.status === "valid" && (
                     <button
                       onClick={() => handleCheckIn(result.id)}
@@ -414,6 +422,7 @@ const Sales = () => {
                   <th className="px-4 py-3 font-medium">Email</th>
                   <th className="px-4 py-3 font-medium">Phone</th>
                   <th className="px-4 py-3 font-medium">Location</th>
+                  <th className="px-4 py-3 font-medium">Group Size</th>
                   <th className="px-4 py-3 font-medium">Status</th>
                 </tr>
               </thead>
@@ -424,6 +433,7 @@ const Sales = () => {
                     <td className="px-4 py-3 text-white/90">{guest.email || "—"}</td>
                     <td className="px-4 py-3 text-white/90">{guest.phone || "—"}</td>
                     <td className="px-4 py-3 text-white/90">{guest.location || "—"}</td>
+                    <td className="px-4 py-3 text-white/90">{guest.groupSize ? `${guest.groupSize} people` : "—"}</td>
                     <td className="px-4 py-3">
                       <span
                         className={`inline-flex items-center rounded-md px-3 py-1 text-xs text-gray-200 ${
@@ -437,7 +447,7 @@ const Sales = () => {
                 ))}
                 {guests.length === 0 && (
                   <tr>
-                    <td colSpan={5} className="px-4 py-6 text-center text-gray-400">
+                    <td colSpan={6} className="px-4 py-6 text-center text-gray-400">
                       No guests found.
                     </td>
                   </tr>

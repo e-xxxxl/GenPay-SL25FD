@@ -18,7 +18,7 @@ const FirstSection = () => {
           throw new Error("No authentication token found")
         }
 
-        const response = await axios.get("https://genpay-sl25bd-1.onrender.com/api/auth/me", {
+        const response = await axios.get("http://localhost:5000/api/auth/me", {
           headers: {
             Authorization: `Bearer ${token}`,
           },

@@ -100,7 +100,7 @@ const UploadEventHeader = ({ onNavigate, onImageUpload, onSkip, onContinue }) =>
       formData.append("imageType", "header");
       formData.append("eventId", eventId); // Include eventId
 
-      const response = await axios.post("https://genpay-sl25bd-1.onrender.com/api/events/upload-image", formData, {
+      const response = await axios.post("http://localhost:5000/api/events/upload-image", formData, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data",

@@ -15,20 +15,22 @@ const Buyticket = () => {
     .replace(/-+/g, '-')
     .trim();
 
-  // Normalize tickets
+  // Normalize tickets with ticketType and ticketDescription
   const normalizedTickets = useMemo(() => {
     if (Array.isArray(event?.tickets) && event.tickets.length > 0) {
       return event.tickets.map((t, idx) => ({
         id: t.id || `tier-${idx}`,
         name: t.name || 'Ticket',
         price: typeof t.price === 'number' ? t.price : (typeof t.groupPrice === 'number' ? t.groupPrice : 0),
-        desc: t.ticketDescription || (t.ticketType === 'Group' ? 'Group ticket' : 'Includes charges'),
-        quantity: typeof t.quantity === 'number' ? t.quantity : 0, // Include available quantity
+        ticketType: t.ticketType || 'Individual', // Default to Individual if not specified
+        ticketDescription: t.ticketDescription || (t.ticketType === 'Group' ? `Group ticket for ${t.groupSize || 'multiple'} people` : 'Includes charges'),
+        groupSize: t.groupSize || null, // Include groupSize for group tickets
+        quantity: typeof t.quantity === 'number' ? t.quantity : 0, // Available quantity
       }));
     }
     return [
-      { id: 'regular', name: 'Regular', price: 20000, desc: 'Includes charges', quantity: 0 },
-      { id: 'vip', name: 'VIP Ravers', price: 90000, desc: 'For the premium experience', quantity: 0 },
+      { id: 'regular', name: 'Regular', price: 20000, ticketType: 'Individual', ticketDescription: 'Includes charges', groupSize: null, quantity: 0 },
+      { id: 'vip', name: 'VIP Ravers', price: 90000, ticketType: 'Individual', ticketDescription: 'For the premium experience', groupSize: null, quantity: 0 },
     ];
   }, [event]);
 
@@ -140,7 +142,9 @@ const Buyticket = () => {
                     <div className="min-w-0">
                       <h3 className="text-lg font-semibold">{t.name}</h3>
                       <div className="mt-1 text-pink-400 font-semibold">{formatNaira(t.price)}</div>
-                      <p className="mt-1 text-gray-400 text-sm">{t.desc || 'Includes charges'}</p>
+                      <p className="mt-1 text-gray-400 text-sm">
+                        {t.ticketDescription} {t.ticketType === 'Group' && t.groupSize ? `(Group of ${t.groupSize} people)` : t.ticketType === 'Individual' ? '(Individual ticket)' : ''}
+                      </p>
                       {t.quantity === 0 && (
                         <p className="mt-1 text-red-400 font-semibold">Sold Out</p>
                       )}
@@ -208,7 +212,7 @@ const Buyticket = () => {
                   items.map((it) => (
                     <div key={it.id} className="flex items-center justify-between">
                       <span className="text-white/90">
-                        {it.quantity}x {it.name.toUpperCase()}
+                        {it.quantity}x {it.name.toUpperCase()} {it.ticketType === 'Group' && it.groupSize ? `(Group of ${it.groupSize})` : it.ticketType === 'Individual' ? '(Individual)' : ''}
                       </span>
                       <span className="text-white/90">
                         {formatNaira(it.price * it.quantity)}
