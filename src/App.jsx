@@ -35,6 +35,9 @@ import Sales from "./Components/Host/Event/Sales";
 import LegalDocumentation from "./Components/Explore/LegalDocumentation";
 import RefundPolicy from "./Components/Explore/RefundPolicy";
 import WalletPage from "./Components/Pages/WalletPage";
+import AdminLogin from "./Components/Admin/AdminLogin";
+import AdminDashboard from "./Components/Admin/AdminDashboard";
+import AdminRoute from "./Components/Admin/AdminRoute";
 
 function App() {
   return (
@@ -70,6 +73,17 @@ function App() {
         <Route path="/legal" element={<LegalDocumentation/>} />
         <Route path="/legal/refund-policy" element={<RefundPolicy/>} />
         <Route path="/wallet" element={<WalletPage/>} />
+
+        {/* Admin Routes */}
+        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route 
+          path="/admin/dashboard" 
+          element={
+            <AdminRoute >
+              <AdminDashboard />
+            </AdminRoute>
+          } 
+        />
       </Routes>
     </>
   );
