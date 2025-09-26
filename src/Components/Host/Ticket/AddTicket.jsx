@@ -106,7 +106,7 @@ const AddTicket = () => {
         purchaseLimit: Number(formData.purchaseLimit) || null,
       }
 
-      const response = await fetch(`http://localhost:5000/api/events/${id}/tickets`, {
+      const response = await fetch(`https://genpay-sl25bd-1.onrender.com/api/events/${id}/tickets`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
