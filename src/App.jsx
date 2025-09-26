@@ -38,6 +38,8 @@ import WalletPage from "./Components/Pages/WalletPage";
 import AdminLogin from "./Components/Admin/AdminLogin";
 import AdminDashboard from "./Components/Admin/AdminDashboard";
 import AdminRoute from "./Components/Admin/AdminRoute";
+import AboutUs from "./Components/Explore/AboutUs";
+import NotFound from "./Components/Explore/NotFound";
 
 function App() {
   return (
@@ -73,6 +75,8 @@ function App() {
         <Route path="/legal" element={<LegalDocumentation/>} />
         <Route path="/legal/refund-policy" element={<RefundPolicy/>} />
         <Route path="/wallet" element={<WalletPage/>} />
+        <Route path="/aboutus" element={<AboutUs/>} />
+        <Route path="*" element={<NotFound/>} />
 
         {/* Admin Routes */}
         <Route path="/admin/login" element={<AdminLogin />} />

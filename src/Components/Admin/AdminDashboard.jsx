@@ -28,6 +28,7 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(true)
   const [hosts, setHosts] = useState([])
   const [payouts, setPayouts] = useState([])
+  const [payoutHistory, setPayoutHistory] = useState([])
   const [selectedHost, setSelectedHost] = useState(null)
   const [selectedPayout, setSelectedPayout] = useState(null)
   const [showPayoutModal, setShowPayoutModal] = useState(false)
@@ -37,7 +38,7 @@ const AdminDashboard = () => {
     proofOfPayment: null
   })
 
-  const API_BASE_URL = import.meta.env.REACT_APP_API_URL || "https://genpay-sl25bd-1.onrender.com"
+  const API_BASE_URL = import.meta.env.REACT_APP_API_URL || "http://localhost:5000"
 
   useEffect(() => {
     const token = localStorage.getItem('adminToken')
@@ -110,6 +111,19 @@ const AdminDashboard = () => {
         setPayouts(payoutsResult.data.payouts || [])
       }
 
+      // Fetch payout history
+      const historyResponse = await fetch(`${API_BASE_URL}/api/admin/payouts/approval-history`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+
+      if (historyResponse.ok) {
+        const historyResult = await historyResponse.json()
+        setPayoutHistory(historyResult.data.approvals || [])
+      }
+
     } catch (error) {
       console.error('Error fetching data:', error)
       localStorage.removeItem('adminToken')
@@ -140,8 +154,7 @@ const AdminDashboard = () => {
     }
   }
 
- // In your AdminDashboard component - handleApprovePayout function
-const handleApprovePayout = async (e) => {
+ const handleApprovePayout = async (e) => {
   e.preventDefault()
   const token = localStorage.getItem('adminToken')
   
@@ -615,6 +628,85 @@ const handleApprovePayout = async (e) => {
                   </div>
                 )}
               </div>
+
+              {/* Payout History Section */}
+              <div className="mt-12">
+                <h2 className="text-xl font-semibold mb-4">Payout History ({payoutHistory.length})</h2>
+                <div className="grid gap-6">
+                  {payoutHistory.map((approval) => {
+                    const payout = approval.payout || {}
+                    const host = payout.host || {}
+                    return (
+                      <div key={approval._id} className="bg-gray-900 rounded-lg p-6">
+                        <div className="flex justify-between items-start mb-4">
+                          <div>
+                            <h3 className="text-lg font-semibold text-white">
+                              {host.displayName} - {formatNaira(approval.approvedAmount)}
+                            </h3>
+                            <p className="text-gray-400">{host.email}</p>
+                            <p className="text-gray-400 text-sm">Processed: {formatDate(approval.approvalDate)}</p>
+                          </div>
+                          <span className={`px-3 py-1 rounded-full text-sm ${
+                            approval.status === 'approved' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'
+                          }`}>
+                            {approval.status.charAt(0).toUpperCase() + approval.status.slice(1)}
+                          </span>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                          <div>
+                            <p className="text-gray-400 text-sm">Bank Details</p>
+                            <p className="text-white">{payout.bankDetails?.bankName}</p>
+                            <p className="text-gray-300">{payout.bankDetails?.accountNumber} - {payout.bankDetails?.accountName}</p>
+                          </div>
+                          <div>
+                            <p className="text-gray-400 text-sm">Breakdown</p>
+                            <div className="flex justify-between">
+                              <span>Approved Amount:</span>
+                              <span>{formatNaira(approval.approvedAmount)}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span>Fee:</span>
+                              <span>{formatNaira(payout.fee)}</span>
+                            </div>
+                            <div className="flex justify-between font-semibold">
+                              <span>Net Amount:</span>
+                              <span>{formatNaira(approval.approvedAmount - payout.fee)}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="mt-4">
+                          <p className="text-gray-400 text-sm">Notes:</p>
+                          <p className="text-gray-300">{approval.notes || 'No notes provided'}</p>
+                        </div>
+
+                        {approval.proofOfPayment?.imageUrl && (
+                          <div className="mt-4">
+                            <p className="text-gray-400 text-sm">Proof of Payment:</p>
+                            <a 
+                              href={approval.proofOfPayment.imageUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-purple-400 hover:text-purple-300 flex items-center space-x-2 mt-1"
+                            >
+                              <Eye className="h-4 w-4" />
+                              <span>View Proof</span>
+                            </a>
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })}
+
+                  {payoutHistory.length === 0 && (
+                    <div className="text-center py-12">
+                      <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                      <p className="text-gray-400">No payout history</p>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           )}
 
@@ -622,7 +714,7 @@ const handleApprovePayout = async (e) => {
           {activeTab === 'events' && (
             <div className="text-center py-12">
               <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-400">Events management coming soon</p>
+              <p className="text-gray-400">Event management coming soon</p>
             </div>
           )}
 

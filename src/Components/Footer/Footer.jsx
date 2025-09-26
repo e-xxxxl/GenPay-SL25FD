@@ -1,15 +1,13 @@
-import React from 'react'
-
 const Footer = () => {
   return (
     <footer className="bg-black border-t border-gray-800">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16">
         {/* Main Footer Content */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 sm:gap-8 md:gap-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-10 lg:gap-12">
           {/* Genpay Column */}
-          <div>
+          <div className="space-y-4">
             <h3
-              className="text-white text-lg font-semibold mb-4 sm:mb-6"
+              className="text-white text-base sm:text-lg font-semibold"
               style={{ fontFamily: '"Poppins", sans-serif' }}
             >
               Genpay
@@ -17,8 +15,8 @@ const Footer = () => {
             <ul className="space-y-3">
               <li>
                 <a
-                  href="#"
-                  className="text-gray-400 hover:text-white transition-colors duration-200"
+                  href="/about-us"
+                  className="text-gray-400 hover:text-white transition-colors duration-200 text-sm sm:text-base block py-1"
                   style={{ fontFamily: '"Poppins", sans-serif' }}
                 >
                   About us
@@ -27,7 +25,7 @@ const Footer = () => {
               <li>
                 <a
                   href="#"
-                  className="text-gray-400 hover:text-white transition-colors duration-200"
+                  className="text-gray-400 hover:text-white transition-colors duration-200 text-sm sm:text-base block py-1"
                   style={{ fontFamily: '"Poppins", sans-serif' }}
                 >
                   Career
@@ -35,8 +33,8 @@ const Footer = () => {
               </li>
               <li>
                 <a
-                  href="#"
-                  className="text-gray-400 hover:text-white transition-colors duration-200"
+                  href="/explore"
+                  className="text-gray-400 hover:text-white transition-colors duration-200 text-sm sm:text-base block py-1"
                   style={{ fontFamily: '"Poppins", sans-serif' }}
                 >
                   Events
@@ -46,9 +44,9 @@ const Footer = () => {
           </div>
 
           {/* Support Column */}
-          <div>
+          <div className="space-y-4">
             <h3
-              className="text-white text-lg font-semibold mb-4 sm:mb-6"
+              className="text-white text-base sm:text-lg font-semibold"
               style={{ fontFamily: '"Poppins", sans-serif' }}
             >
               Support
@@ -57,7 +55,7 @@ const Footer = () => {
               <li>
                 <a
                   href="#"
-                  className="text-gray-400 hover:text-white transition-colors duration-200"
+                  className="text-gray-400 hover:text-white transition-colors duration-200 text-sm sm:text-base block py-1"
                   style={{ fontFamily: '"Poppins", sans-serif' }}
                 >
                   Help Center
@@ -66,7 +64,7 @@ const Footer = () => {
               <li>
                 <a
                   href="#"
-                  className="text-gray-400 hover:text-white transition-colors duration-200"
+                  className="text-gray-400 hover:text-white transition-colors duration-200 text-sm sm:text-base block py-1"
                   style={{ fontFamily: '"Poppins", sans-serif' }}
                 >
                   FAQs
@@ -74,8 +72,8 @@ const Footer = () => {
               </li>
               <li>
                 <a
-                  href="#"
-                  className="text-gray-400 hover:text-white transition-colors duration-200"
+                  href="mailto:support@genpay.ng"
+                  className="text-gray-400 hover:text-white transition-colors duration-200 text-sm sm:text-base block py-1"
                   style={{ fontFamily: '"Poppins", sans-serif' }}
                 >
                   Contact us
@@ -85,9 +83,9 @@ const Footer = () => {
           </div>
 
           {/* Socials Column */}
-          <div>
+          <div className="space-y-4">
             <h3
-              className="text-white text-lg font-semibold mb-4 sm:mb-6"
+              className="text-white text-base sm:text-lg font-semibold"
               style={{ fontFamily: '"Poppins", sans-serif' }}
             >
               Socials
@@ -95,8 +93,10 @@ const Footer = () => {
             <ul className="space-y-3">
               <li>
                 <a
-                  href="#"
-                  className="text-gray-400 hover:text-white transition-colors duration-200"
+                  href="https://www.instagram.com/genpay.ng?igsh=MWJtcG12OHYwYmRmag=="
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-400 hover:text-white transition-colors duration-200 text-sm sm:text-base block py-1"
                   style={{ fontFamily: '"Poppins", sans-serif' }}
                 >
                   Instagram
@@ -104,8 +104,10 @@ const Footer = () => {
               </li>
               <li>
                 <a
-                  href="#"
-                  className="text-gray-400 hover:text-white transition-colors duration-200"
+                  href="https://x.com/genpayng?t=YANEt6Wsz2T7q6jiYaX92g&s=09"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-400 hover:text-white transition-colors duration-200 text-sm sm:text-base block py-1"
                   style={{ fontFamily: '"Poppins", sans-serif' }}
                 >
                   X (Twitter)
@@ -113,17 +115,10 @@ const Footer = () => {
               </li>
               <li>
                 <a
-                  href="#"
-                  className="text-gray-400 hover:text-white transition-colors duration-200"
-                  style={{ fontFamily: '"Poppins", sans-serif' }}
-                >
-                  Snapchat
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#"
-                  className="text-gray-400 hover:text-white transition-colors duration-200"
+                  href="https://www.tiktok.com/@genpay.ng?_t=ZM-903puvggodY&_r=1"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-400 hover:text-white transition-colors duration-200 text-sm sm:text-base block py-1"
                   style={{ fontFamily: '"Poppins", sans-serif' }}
                 >
                   TikTok
@@ -133,9 +128,9 @@ const Footer = () => {
           </div>
 
           {/* Work with us Column */}
-          <div>
+          <div className="space-y-4">
             <h3
-              className="text-white text-lg font-semibold mb-4 sm:mb-6"
+              className="text-white text-base sm:text-lg font-semibold"
               style={{ fontFamily: '"Poppins", sans-serif' }}
             >
               Work with us
@@ -144,7 +139,7 @@ const Footer = () => {
               <li>
                 <a
                   href="#"
-                  className="text-gray-400 hover:text-white transition-colors duration-200"
+                  className="text-gray-400 hover:text-white transition-colors duration-200 text-sm sm:text-base block py-1"
                   style={{ fontFamily: '"Poppins", sans-serif' }}
                 >
                   Become a partner
@@ -153,7 +148,7 @@ const Footer = () => {
               <li>
                 <a
                   href="#"
-                  className="text-gray-400 hover:text-white transition-colors duration-200"
+                  className="text-gray-400 hover:text-white transition-colors duration-200 text-sm sm:text-base block py-1"
                   style={{ fontFamily: '"Poppins", sans-serif' }}
                 >
                   Become an ambassador
@@ -164,32 +159,34 @@ const Footer = () => {
         </div>
 
         {/* Bottom Footer */}
-        <div className="border-t border-gray-800 mt-8 sm:mt-12 pt-6 sm:pt-8">
-          <div className="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
+        <div className="border-t border-gray-800 mt-8 sm:mt-10 lg:mt-12 pt-6 sm:pt-8">
+          <div className="flex flex-col space-y-4 sm:space-y-6 lg:flex-row lg:justify-between lg:items-center lg:space-y-0">
             {/* Copyright */}
-            <p className="text-gray-500 text-sm" style={{ fontFamily: '"Poppins", sans-serif' }}>
-              Copyrights 2024. All rights reserved - Genpay
-            </p>
+            <div className="text-center lg:text-left">
+              <p className="text-gray-500 text-xs sm:text-sm" style={{ fontFamily: '"Poppins", sans-serif' }}>
+                Copyrights 2024. All rights reserved - Genpay
+              </p>
+            </div>
 
             {/* Legal Links */}
-            <div className="flex flex-col sm:flex-row justify-center sm:justify-end space-y-2 sm:space-y-0 sm:space-x-6">
+            <div className="flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:space-x-4 lg:space-x-6 items-center">
               <a
-                href="#"
-                className="text-gray-500 hover:text-gray-300 text-sm transition-colors duration-200"
+                href="/legal-documentation"
+                className="text-gray-500 hover:text-gray-300 text-xs sm:text-sm transition-colors duration-200 whitespace-nowrap"
                 style={{ fontFamily: '"Poppins", sans-serif' }}
               >
                 Terms & Conditions
               </a>
               <a
-                href="#"
-                className="text-gray-500 hover:text-gray-300 text-sm transition-colors duration-200"
+                href="/legal-documentation"
+                className="text-gray-500 hover:text-gray-300 text-xs sm:text-sm transition-colors duration-200 whitespace-nowrap"
                 style={{ fontFamily: '"Poppins", sans-serif' }}
               >
                 Privacy Policy
               </a>
               <a
-                href="#"
-                className="text-gray-500 hover:text-gray-300 text-sm transition-colors duration-200"
+                href="/refund-policy"
+                className="text-gray-500 hover:text-gray-300 text-xs sm:text-sm transition-colors duration-200 whitespace-nowrap"
                 style={{ fontFamily: '"Poppins", sans-serif' }}
               >
                 Refund Policy
@@ -201,6 +198,5 @@ const Footer = () => {
     </footer>
   )
 }
-
 
 export default Footer

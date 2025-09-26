@@ -72,9 +72,9 @@ const Sales = () => {
 
       console.log("Fetching data for event ID:", id);
       const [eventRes, checkinRes, ticketBuyersRes] = await Promise.allSettled([
-        fetch(`https://genpay-sl25bd-1.onrender.com/api/events/${id}`, { headers }),
-        fetch(`https://genpay-sl25bd-1.onrender.com/api/events/${id}/checkins`, { headers }),
-        fetch(`https://genpay-sl25bd-1.onrender.com/api/events/${id}/ticket-buyers`, { headers }),
+        fetch(`http://localhost:5000/api/events/${id}`, { headers }),
+        fetch(`http://localhost:5000/api/events/${id}/checkins`, { headers }),
+        fetch(`http://localhost:5000/api/events/${id}/ticket-buyers`, { headers }),
       ]);
 
       if (cancelled) return;
@@ -144,7 +144,7 @@ const Sales = () => {
         }
         const cleanQuery = query.trim();
         console.log("Searching for:", cleanQuery, "Event ID:", id);
-        const response = await fetch(`https://genpay-sl25bd-1.onrender.com/api/events/${id}/search-ticket`, {
+        const response = await fetch(`http://localhost:5000/api/events/${id}/search-ticket`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -184,7 +184,7 @@ const Sales = () => {
       }
 
       console.log("Checking in ticket:", ticketId, "for event:", id);
-      const response = await fetch(`https://genpay-sl25bd-1.onrender.com/api/events/${id}/check-in-ticket`, {
+      const response = await fetch(`http://localhost:5000/api/events/${id}/check-in-ticket`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

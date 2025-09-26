@@ -8,6 +8,8 @@ const FirstSection = () => {
     }
   }
 
+
+
   return (
     // <section className="bg-black md: mt-10 flex items-center justify-center px-4 sm:px-6 lg:px-8">
     //   <div className="max-w-4xl mx-auto text-center">
@@ -55,19 +57,17 @@ const FirstSection = () => {
     // </section>
 
      <section className="bg-black mt-10 flex items-center justify-center px-4 sm:px-6 lg:px-8">
-      <div className="w-full max-w-7xl mx-auto text-center">
-        {/* Main Headline */}
-        <h1
-          className="text-white text-2xl  sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-8 sm:mb-10 md:mb-12 leading-tight px-2"
+ <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2
+          className="text-white text-3xl sm:text-4xl md:text-5xl font-bold leading-tight max-w-3xl"
           style={{ fontFamily: '"Poppins", sans-serif' }}
         >
-          Discover and secure tickets to the hottest <br />
-          <span className='md:ml-[-462px]'>events, all in one place</span>
-        </h1>
+          Discover and secure tickets to the hottest events, all in one place
+        </h2>
 
         {/* Content Card */}
         <div
-          className="rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 lg:p-10 xl:p-12 text-left mx-auto w-full max-w-sm sm:max-w-md md:max-w-2xl lg:max-w-4xl xl:max-w-5xl"
+          className=" mt-6 rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 lg:p-10 xl:p-12 text-left mx-auto w-full max-w-sm sm:max-w-md md:max-w-2xl lg:max-w-4xl xl:max-w-5xl"
           style={{
             background: "linear-gradient(135deg, #A228AF 0%, #FF0000 100%)",
           }}
@@ -89,7 +89,9 @@ const FirstSection = () => {
 
           {/* CTA Button */}
           <button
-            onClick={scrollToWaitlistForm}
+             onClick={() => {
+                window.location.href = "/explore"
+              }}
             className="bg-black text-white px-4 sm:px-6 md:px-8 py-2.5 sm:py-3 rounded-lg font-medium hover:bg-gray-900 transition-colors duration-200 text-sm sm:text-base w-full sm:w-auto"
             style={{ fontFamily: '"Poppins", sans-serif' }}
           >

@@ -23,7 +23,9 @@ const SecondSection = () => {
   }, [carouselImages.length])
 
   const handleExploreMore = () => {
-    // Add your explore functionality here
+
+                window.location.href = "/explore"
+              
     console.log("Explore more clicked")
   }
 

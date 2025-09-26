@@ -13,7 +13,7 @@ const AdminLogin = () => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
 
-  const API_BASE_URL = import.meta.env.REACT_APP_API_URL || "https://genpay-sl25bd-1.onrender.com"
+  const API_BASE_URL = import.meta.env.REACT_APP_API_URL || "http://localhost:5000"
 
   const handleInputChange = (e) => {
     const { name, value } = e.target

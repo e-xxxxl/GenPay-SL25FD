@@ -3,15 +3,18 @@ import React from 'react'
 const ThirdSection = () => {
   const handleCreateEvent = () => {
     // Add your create event functionality here
+
+                window.location.href = "/signup"
+         
     console.log("Create your first event clicked")
   }
 
   return (
     <section className="bg-black py-12 sm:py-16 md:py-20 lg:py-24">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 md:text-center">
         {/* Main Headline */}
         <h2
-          className="text-white text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-6 sm:mb-8 leading-tight"
+          className="text-white text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-6 sm:mb-8 leading-tight "
           style={{ fontFamily: '"Poppins", sans-serif' }}
         >
           Bring your event to life. <br />Create, manage, and sell tickets, all with one tap.

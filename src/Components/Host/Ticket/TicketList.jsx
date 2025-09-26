@@ -27,7 +27,7 @@ const TicketList = () => {
         }
 
         // Fetch event details
-        const eventResponse = await fetch(`https://genpay-sl25bd-1.onrender.com/api/events/${id}`, {
+        const eventResponse = await fetch(`http://localhost:5000/api/events/${id}`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -45,7 +45,7 @@ const TicketList = () => {
         setEventName(eventData.data.event.eventName || "Unnamed Event");
 
         // Fetch tickets
-        const ticketsResponse = await fetch(`https://genpay-sl25bd-1.onrender.com/api/events/${id}/getTickets`, {
+        const ticketsResponse = await fetch(`http://localhost:5000/api/events/${id}/getTickets`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -137,7 +137,7 @@ const TicketList = () => {
       if (!token) {
         throw new Error("No authentication token found");
       }
-      const response = await fetch(`https://genpay-sl25bd-1.onrender.com/api/events/${id}/tickets/${ticketId}`, {
+      const response = await fetch(`http://localhost:5000/api/events/${id}/tickets/${ticketId}`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -167,7 +167,7 @@ const TicketList = () => {
         id: uuidv4(),
         name: `${ticket.name} (Copy)`,
       };
-      const response = await fetch(`https://genpay-sl25bd-1.onrender.com/api/events/${id}/tickets`, {
+      const response = await fetch(`http://localhost:5000/api/events/${id}/tickets`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -64,10 +64,10 @@ const Navbar = () => {
             </button>
             {isGenpayDropdownOpen && (
               <div className="absolute top-full left-0 mt-2 bg-gray-800 rounded-md shadow-lg py-2 min-w-[180px] z-50">
-                <a href="#" className="block px-4 py-2 text-white hover:bg-gray-700 transition-colors">
+                <a href="/aboutus" className="block px-4 py-2 text-white hover:bg-gray-700 transition-colors">
                   About Us 
                 </a>
-                <a href="#" className="block px-4 py-2 text-white hover:bg-gray-700 transition-colors">
+                <a href="/contactus" className="block px-4 py-2 text-white hover:bg-gray-700 transition-colors">
                   Get in Touch
                 </a>
               </div>
@@ -146,10 +146,10 @@ const Navbar = () => {
               </button>
               {isGenpayDropdownOpen && (
                 <div className="ml-4 mt-2 space-y-2">
-                  <a href="#" className="block text-gray-300 hover:text-white py-1">
+                  <a href="/aboutus" className="block text-gray-300 hover:text-white py-1">
                     About Us
                   </a>
-                  <a href="#" className="block text-gray-300 hover:text-white py-1">
+                  <a href="/contactus" className="block text-gray-300 hover:text-white py-1">
                     Get in Touch
                   </a>
                 </div>
