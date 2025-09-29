@@ -33,7 +33,7 @@ const EditTicket = () => {
         if (!token) {
           throw new Error("No authentication token found");
         }
-        const response = await fetch(`http://localhost:5000/api/events/${id}/getTickets`, {
+        const response = await fetch(`https://genpay-sl25bd-1.onrender.com/api/events/${id}/getTickets`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -149,7 +149,7 @@ const EditTicket = () => {
         purchaseLimit: Number(formData.purchaseLimit) || null,
       };
 
-      const response = await fetch(`http://localhost:5000/api/events/${id}/tickets/${ticketId}`, {
+      const response = await fetch(`https://genpay-sl25bd-1.onrender.com/api/events/${id}/tickets/${ticketId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
