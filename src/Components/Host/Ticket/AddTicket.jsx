@@ -13,9 +13,9 @@ const AddTicket = () => {
     ticketType: "Individual", // Default to Individual
     isFree: false, // Default to Paid
     perTicketPrice: "",
-    perTicketCurrency: "USD",
+    perTicketCurrency: "NGN",
     groupPrice: "",
-    groupPriceCurrency: "USD",
+    groupPriceCurrency: "NGN",
     groupSize: 2, // Default to 2 people for Group tickets
     quantity: "", // Total tickets available for sale
     perks: [],
@@ -106,7 +106,7 @@ const AddTicket = () => {
         purchaseLimit: Number(formData.purchaseLimit) || null,
       }
 
-      const response = await fetch(`https://genpay-sl25bd-1.onrender.com/api/events/${id}/tickets`, {
+      const response = await fetch(`http://localhost:5000/api/events/${id}/tickets`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -128,7 +128,7 @@ const AddTicket = () => {
   }
 
   return (
-    <div className="min-h-screen bg-black px-4 py-6">
+    <div className="min-h-screen bg-black px-4 py-6 md:px-6 md:py-8">
       <div className="w-full max-w-md mx-auto">
         {/* Header */}
         <div className="mb-6">
@@ -276,18 +276,15 @@ const AddTicket = () => {
               </div>
 
               {/* Group Price */}
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-col sm:flex-row">
                 <select
                   name="groupPriceCurrency"
                   value={formData.groupPriceCurrency}
                   onChange={handleInputChange}
-                  className="flex-1 bg-gray-800 text-white rounded-lg px-4 py-3 border border-gray-600 focus:outline-none focus:border-pink-500 appearance-none"
+                  className="w-full bg-gray-800 text-white rounded-lg px-4 py-3 border border-gray-600 focus:outline-none focus:border-pink-500 appearance-none"
                   disabled={formData.isFree}
                 >
-                  <option value="USD">USD ($)</option>
                   <option value="NGN">NGN (₦)</option>
-                  <option value="GBP">GBP (£)</option>
-                  <option value="EUR">EUR (€)</option>
                 </select>
                 <input
                   type="number"
@@ -295,7 +292,7 @@ const AddTicket = () => {
                   value={formData.groupPrice}
                   onChange={handleInputChange}
                   placeholder="Group Price"
-                  className="flex-1 bg-gray-800 text-white rounded-lg px-4 py-3 border border-gray-600 focus:outline-none focus:border-pink-500 placeholder-gray-400"
+                  className="w-full bg-gray-800 text-white rounded-lg px-4 py-3 border border-gray-600 focus:outline-none focus:border-pink-500 placeholder-gray-400"
                   min="0"
                   disabled={formData.isFree}
                   required={!formData.isFree}
@@ -322,18 +319,15 @@ const AddTicket = () => {
               </div>
 
               {/* Per Ticket Price */}
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-col sm:flex-row">
                 <select
                   name="perTicketCurrency"
                   value={formData.perTicketCurrency}
                   onChange={handleInputChange}
-                  className="flex-1 bg-gray-800 text-white rounded-lg px-4 py-3 border border-gray-600 focus:outline-none focus:border-pink-500 appearance-none"
+                  className="w-full bg-gray-800 text-white rounded-lg px-4 py-3 border border-gray-600 focus:outline-none focus:border-pink-500 appearance-none"
                   disabled={formData.isFree}
                 >
-                  <option value="USD">USD ($)</option>
                   <option value="NGN">NGN (₦)</option>
-                  <option value="GBP">GBP (£)</option>
-                  <option value="EUR">EUR (€)</option>
                 </select>
                 <input
                   type="number"
@@ -341,7 +335,7 @@ const AddTicket = () => {
                   value={formData.perTicketPrice}
                   onChange={handleInputChange}
                   placeholder="Price"
-                  className="flex-1 bg-gray-800 text-white rounded-lg px-4 py-3 border border-gray-600 focus:outline-none focus:border-pink-500 placeholder-gray-400"
+                  className="w-full bg-gray-800 text-white rounded-lg px-4 py-3 border border-gray-600 focus:outline-none focus:border-pink-500 placeholder-gray-400"
                   min="0"
                   disabled={formData.isFree}
                   required={!formData.isFree}
@@ -377,21 +371,21 @@ const AddTicket = () => {
 
           {/* Perks */}
           <div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-col sm:flex-row">
               <input
                 type="text"
                 value={newPerk}
                 onChange={(e) => setNewPerk(e.target.value)}
                 placeholder="Perks"
-                className="flex-1 bg-gray-800 text-white rounded-lg px-4 py-3 border border-gray-600 focus:outline-none focus:border-pink-500 placeholder-gray-400"
+                className="w-full bg-gray-800 text-white rounded-lg px-4 py-3 border border-gray-600 focus:outline-none focus:border-pink-500 placeholder-gray-400"
               />
               <button
                 type="button"
                 onClick={handleAddPerk}
-                className="px-4 py-3 text-white rounded-lg font-medium transition-colors"
+                className="px-4 py-3 text-white rounded-lg font-medium transition-colors w-full sm:w-auto"
                 style={{ background: "linear-gradient(135deg, #A228AF 0%, #FF0000 100%)" }}
               >
-                <Plus className="w-4 h-4" />
+                <Plus className="w-4 h-4 inline" />
                 <span className="ml-1 text-sm">Add perk</span>
               </button>
             </div>
@@ -417,17 +411,17 @@ const AddTicket = () => {
           </div>
 
           {/* Action Buttons */}
-          <div className="flex gap-3 pt-4">
+          <div className="flex gap-3 pt-4 flex-col sm:flex-row">
             <button
               type="button"
               onClick={() => navigate(`/ticket-list/${id}`)}
-              className="flex-1 py-3 text-white rounded-lg font-medium bg-gray-700 hover:bg-gray-600 transition-colors"
+              className="w-full py-3 text-white rounded-lg font-medium bg-gray-700 hover:bg-gray-600 transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="flex-1 py-3 text-white rounded-lg font-medium transition-all duration-200 hover:opacity-90"
+              className="w-full py-3 text-white rounded-lg font-medium transition-all duration-200 hover:opacity-90"
               style={{ background: "linear-gradient(135deg, #A228AF 0%, #FF0000 100%)" }}
             >
               Continue

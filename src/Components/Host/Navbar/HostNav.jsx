@@ -75,43 +75,7 @@ const HostNav = () => {
       {isMenuOpen && (
         <div className="lg:hidden absolute top-full left-0 right-0 bg-black z-50 border-t border-gray-800">
           <div className="px-6 py-4 space-y-4">
-            <Link to="/" style={{ textDecoration: 'none', color: 'inherit' }}>
-            <a
-              className="block text-gray-400 hover:text-white py-2"
-              style={{ fontFamily: '"Poppins", sans-serif' }}
-            >
-              Home
-            </a>
-            </Link>
-            <a
-              href="#"
-              className="block text-gray-400 hover:text-white py-2"
-              style={{ fontFamily: '"Poppins", sans-serif' }}
-            >
-              Explore
-            </a>
             
-            <div className="py-2">
-              <button
-                onClick={() => setIsGenpayDropdownOpen(!isGenpayDropdownOpen)}
-                className="text-gray-400 hover:text-white flex items-center gap-1 w-full text-left"
-                style={{ fontFamily: '"Poppins", sans-serif' }}
-              >
-                Genpay
-                <ChevronDown className="w-4 h-4" />
-              </button>
-              {isGenpayDropdownOpen && (
-                <div className="ml-4 mt-2 space-y-2">
-                  <a href="#" className="block text-gray-300 hover:text-white py-1">
-                    About Us
-                  </a>
-                  <a href="#" className="block text-gray-300 hover:text-white py-1">
-                    Get in Touch
-                  </a>
-                </div>
-              )}
-
-            </div>
             <a
               href="#"
               className="block text-gray-400 hover:text-white py-2"
