@@ -442,7 +442,7 @@ const EventDetails = () => {
         {/* Navigation Tabs */}
         <div className="mb-8">
           <nav className="flex flex-wrap gap-4 sm:gap-8 border-b border-gray-800 pb-2">
-            {["Event", "Tickets", "Sales", "More"].map((tab) => (
+            {["Event", "Tickets", "Sales"].map((tab) => (
               <button
                 key={tab}
                 onClick={() => {

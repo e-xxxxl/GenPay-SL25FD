@@ -1,13 +1,14 @@
-"use client"
+{"use client"}
 
 import { useState } from "react"
 import { ChevronDown, Menu, X } from "lucide-react"
 import genpayLogo from "../../../assets/images/genpaylogo.png" 
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 
 const HostNav = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isGenpayDropdownOpen, setIsGenpayDropdownOpen] = useState(false)
+  const navigate = useNavigate()
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen)
@@ -19,6 +20,27 @@ const HostNav = () => {
       element.scrollIntoView({ behavior: "smooth" })
     }
     setIsMenuOpen(false)
+  }
+
+  const handleLogout = async () => {
+    try {
+      const token = localStorage.getItem("token")
+      if (token) {
+        await fetch("https://genpay-sl25bd-1.onrender.com/api/host/logout", {  // Assuming logout endpoint for hosts
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json"
+          }
+        })
+      }
+    } catch (error) {
+      console.error("Logout error:", error)
+    } finally {
+      localStorage.removeItem("token")
+      setIsMenuOpen(false)
+      navigate("/login")  // Navigate to login page after logout
+    }
   }
 
   return (
@@ -76,13 +98,13 @@ const HostNav = () => {
         <div className="lg:hidden absolute top-full left-0 right-0 bg-black z-50 border-t border-gray-800">
           <div className="px-6 py-4 space-y-4">
             
-            <a
-              href="#"
-              className="block text-gray-400 hover:text-white py-2"
+            <button
+              onClick={handleLogout}
+              className="block text-gray-400 hover:text-white py-2 w-full text-left"
               style={{ fontFamily: '"Poppins", sans-serif' }}
             >
               Logout
-            </a>
+            </button>
             <Link to="/create-event" style={{ textDecoration: 'none', color: 'inherit' }}>
             <button
               onClick={scrollToWaitlistForm}

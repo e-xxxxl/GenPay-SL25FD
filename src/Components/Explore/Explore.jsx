@@ -246,7 +246,7 @@ const Explore = () => {
             className="text-xs sm:text-sm text-gray-400 select-none"
             style={{ fontFamily: '"Poppins", sans-serif' }}
           >
-            More <span className="align-middle">↗</span>
+            {/* More <span className="align-middle">↗</span> */}
           </div>
         </div>
 
@@ -301,7 +301,7 @@ const Explore = () => {
                           className="text-xs sm:text-sm text-gray-400 hover:text-white transition"
                           style={{ fontFamily: '"Poppins", sans-serif' }}
                         >
-                          More <span className="align-middle">↗</span>
+                          {/* More <span className="align-middle">↗</span> */}
                         </button>
                       ) : isExpanded && !showAllPerCategory ? (
                         <button

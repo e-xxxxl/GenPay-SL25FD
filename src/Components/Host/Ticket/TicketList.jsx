@@ -157,50 +157,50 @@ const TicketList = () => {
     }
   };
 
-  const handleDuplicateTicket = async (ticket) => {
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        throw new Error("No authentication token found");
-      }
-      const duplicatedTicket = {
-        ...ticket,
-        id: uuidv4(),
-        name: `${ticket.name} (Copy)`,
-      };
-      const response = await fetch(`https://genpay-sl25bd-1.onrender.com/api/events/${id}/tickets`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(duplicatedTicket),
-      });
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ message: "Unknown error" }));
-        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
-      }
-      const data = await response.json();
-      setTickets((prev) => [...prev, {
-        id: data.data.ticket.id,
-        name: data.data.ticket.name,
-        type: data.data.ticket.ticketType,
-        price: data.data.ticket.ticketType === "Individual" ? data.data.ticket.perTicketPrice || 0 : data.data.ticket.groupPrice || 0,
-        currency: data.data.ticket.ticketType === "Individual" ? data.data.ticket.perTicketCurrency || "USD" : data.data.ticket.groupPriceCurrency || "USD",
-        tag: data.data.ticket.groupSize === "Unlimited Quantity" ? "Unlimited Quantity" : data.data.ticket.groupSize ? `${data.data.ticket.groupSize} Members` : `${data.data.ticket.quantity} Tickets`,
-        status: data.data.ticket.groupSize === "Unlimited Quantity" || data.data.ticket.quantity > 0 ? "active" : "sold out",
-        quantity: data.data.ticket.quantity,
-        ticketDescription: data.data.ticket.ticketDescription || "",
-        perks: data.data.ticket.perks || [],
-        transferFees: data.data.ticket.transferFees || false,
-        purchaseLimit: data.data.ticket.purchaseLimit || null,
-      }]);
-      setShowDropdown(null);
-    } catch (err) {
-      console.error("Error duplicating ticket:", err);
-      alert("Failed to duplicate ticket: " + err.message);
-    }
-  };
+  // const handleDuplicateTicket = async (ticket) => {
+  //   try {
+  //     const token = localStorage.getItem("token");
+  //     if (!token) {
+  //       throw new Error("No authentication token found");
+  //     }
+  //     const duplicatedTicket = {
+  //       ...ticket,
+  //       id: uuidv4(),
+  //       name: `${ticket.name} (Copy)`,
+  //     };
+  //     const response = await fetch(`https://genpay-sl25bd-1.onrender.com/api/events/${id}/tickets`, {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //         Authorization: `Bearer ${token}`,
+  //       },
+  //       body: JSON.stringify(duplicatedTicket),
+  //     });
+  //     if (!response.ok) {
+  //       const errorData = await response.json().catch(() => ({ message: "Unknown error" }));
+  //       throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+  //     }
+  //     const data = await response.json();
+  //     setTickets((prev) => [...prev, {
+  //       id: data.data.ticket.id,
+  //       name: data.data.ticket.name,
+  //       type: data.data.ticket.ticketType,
+  //       price: data.data.ticket.ticketType === "Individual" ? data.data.ticket.perTicketPrice || 0 : data.data.ticket.groupPrice || 0,
+  //       currency: data.data.ticket.ticketType === "Individual" ? data.data.ticket.perTicketCurrency || "USD" : data.data.ticket.groupPriceCurrency || "USD",
+  //       tag: data.data.ticket.groupSize === "Unlimited Quantity" ? "Unlimited Quantity" : data.data.ticket.groupSize ? `${data.data.ticket.groupSize} Members` : `${data.data.ticket.quantity} Tickets`,
+  //       status: data.data.ticket.groupSize === "Unlimited Quantity" || data.data.ticket.quantity > 0 ? "active" : "sold out",
+  //       quantity: data.data.ticket.quantity,
+  //       ticketDescription: data.data.ticket.ticketDescription || "",
+  //       perks: data.data.ticket.perks || [],
+  //       transferFees: data.data.ticket.transferFees || false,
+  //       purchaseLimit: data.data.ticket.purchaseLimit || null,
+  //     }]);
+  //     setShowDropdown(null);
+  //   } catch (err) {
+  //     console.error("Error duplicating ticket:", err);
+  //     alert("Failed to duplicate ticket: " + err.message);
+  //   }
+  // };
 
   const formatPrice = (price, currency = "USD") => {
     const symbols = { USD: "$", NGN: "₦", GBP: "£", EUR: "€" };
@@ -235,7 +235,7 @@ const TicketList = () => {
           </div>
           {/* Navigation Tabs */}
           <nav className="flex flex-wrap space-x-4 sm:space-x-6 border-b border-gray-700 pb-3">
-            {["Event", "Tickets", "Sales", "More"].map((tab) => (
+            {["Event", "Tickets", "Sales"].map((tab) => (
               <button
                 key={tab}
                 onClick={() => {
@@ -336,13 +336,7 @@ const TicketList = () => {
                         >
                           <Edit className="w-4 h-4 mr-2" /> Edit
                         </button>
-                        <button
-                          onClick={() => handleDuplicateTicket(ticket)}
-                          className="w-full px-4 py-2 text-left text-white hover:bg-gray-700 transition-colors flex items-center text-sm"
-                          style={{ fontFamily: '"Poppins", sans-serif' }}
-                        >
-                          <Copy className="w-4 h-4 mr-2" /> Duplicate
-                        </button>
+                       
                         <button
                           onClick={() => handleDeleteTicket(ticket.id)}
                           className="w-full px-4 py-2 text-left text-red-400 hover:bg-gray-700 transition-colors flex items-center text-sm"
