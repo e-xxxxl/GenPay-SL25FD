@@ -202,7 +202,7 @@ const CreateEvent = ({ onNavigate }) => {
       console.log("Creating event:", eventData)
 
       // Send to backend API
-      const response = await axios.post("http://localhost:5000/api/events/create", eventData, {
+      const response = await axios.post("https://genpay-sl25bd-1.onrender.com/api/events/create", eventData, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",

@@ -93,7 +93,7 @@ const Contact = ({ onNavigate }) => {
       }
 
       // Send to backend API
-      const response = await axios.post("http://localhost:5000/api/auth/send-support-message", emailData, {
+      const response = await axios.post("https://genpay-sl25bd-1.onrender.com/api/auth/send-support-message", emailData, {
         headers: {
           "Content-Type": "application/json",
         },
