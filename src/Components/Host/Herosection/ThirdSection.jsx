@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { MoreVertical, Plus, Calendar, MapPin, Users, CheckCircle, AlertCircle, Trash2 } from "lucide-react";
+import { MoreVertical, Plus, Calendar, MapPin, Users, CheckCircle, AlertCircle, Trash2, Clipboard } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const ThirdSection = ({ onCreateEvent }) => {
@@ -8,8 +8,9 @@ const ThirdSection = ({ onCreateEvent }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState("All");
-  const [dropdownEventId, setDropdownEventId] = useState(null); // Track which event's dropdown is open
-  const dropdownRef = useRef(null); // Ref for clicking outside to close dropdown
+  const [dropdownEventId, setDropdownEventId] = useState(null);
+  const [copiedSlugId, setCopiedSlugId] = useState(null);
+  const dropdownRef = useRef(null);
   const navigate = useNavigate();
 
   // Close dropdown when clicking outside
@@ -35,7 +36,7 @@ const ThirdSection = ({ onCreateEvent }) => {
           throw new Error("No authentication token found");
         }
 
-        const response = await fetch("https://genpay-sl25bd-1.onrender.com/api/events", {
+        const response = await fetch("http://localhost:5000/api/events", {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -76,11 +77,11 @@ const ThirdSection = ({ onCreateEvent }) => {
 
           let status;
           if (!hasTickets) {
-            status = "notcompleted"; // Event setup incomplete if no tickets
+            status = "notcompleted";
           } else if (now > eventEndDate) {
-            status = "completed"; // Event ended if current time is after end date
+            status = "completed";
           } else {
-            status = "upcoming"; // Event is upcoming if current time is before or on end date
+            status = "upcoming";
           }
 
           return { ...event, status };
@@ -90,8 +91,8 @@ const ThirdSection = ({ onCreateEvent }) => {
 
     if (events.length > 0) {
       checkEventStatus();
-      const interval = setInterval(checkEventStatus, 60000); // Update every minute
-      return () => clearInterval(interval); // Cleanup interval on unmount
+      const interval = setInterval(checkEventStatus, 60000);
+      return () => clearInterval(interval);
     }
   }, [events.length]);
 
@@ -109,7 +110,7 @@ const ThirdSection = ({ onCreateEvent }) => {
 
   const handleEventMenu = (event, action) => {
     if (action === "menu") {
-      setDropdownEventId(dropdownEventId === event.id ? null : event.id); // Toggle dropdown
+      setDropdownEventId(dropdownEventId === event.id ? null : event.id);
     } else if (action === "delete") {
       if (window.confirm(`Are you sure you want to delete the event "${event.title}"? This action cannot be undone.`)) {
         handleDeleteEvent(event.id);
@@ -117,40 +118,53 @@ const ThirdSection = ({ onCreateEvent }) => {
     }
   };
 
-  const handleDeleteEvent = async (eventId) => {
-  try {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      throw new Error("No authentication token found");
+  const handleCopySlug = (event) => {
+    if (!event.slug) {
+      console.warn(`Slug is undefined for event: ${event.title} (ID: ${event.id})`);
+      return;
     }
-
-    const response = await fetch(`https://genpay-sl25bd-1.onrender.com/api/events/${eventId}`, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
+    const fullUrl = `https://genpay.ng/explore/${event.slug}`;
+    navigator.clipboard.writeText(fullUrl).then(() => {
+      setCopiedSlugId(event.id);
+      setTimeout(() => setCopiedSlugId(null), 2000);
+    }).catch((err) => {
+      console.error("Failed to copy URL:", err);
     });
+  };
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+  const handleDeleteEvent = async (eventId) => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("No authentication token found");
+      }
+
+      const response = await fetch(`http://localhost:5000/api/events/${eventId}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      if (data.status !== "success") {
+        throw new Error(data.message || "Failed to delete event");
+      }
+
+      setEvents((prevEvents) => prevEvents.filter((event) => event.id !== eventId));
+      setDropdownEventId(null);
+      setError(null);
+    } catch (err) {
+      console.error("Error deleting event:", err);
+      setError(err.message || "Failed to delete event");
     }
-
-    const data = await response.json();
-    if (data.status !== "success") {
-      throw new Error(data.message || "Failed to delete event");
-    }
-
-    // Remove the deleted event from the state
-    setEvents((prevEvents) => prevEvents.filter((event) => event.id !== eventId));
-    setDropdownEventId(null); // Close dropdown
-    setError(null); // Clear any previous errors
-  } catch (err) {
-    console.error("Error deleting event:", err);
-    setError(err.message || "Failed to delete event");
-  }
-};
+  };
 
   const categories = [
     "All",
@@ -189,10 +203,10 @@ const ThirdSection = ({ onCreateEvent }) => {
             </div>
           </div>
           {error && (
-  <div className="mb-6 p-4 bg-red-900/20 border border-red-500 rounded-lg text-red-400 text-sm" style={{ fontFamily: '"Poppins", sans-serif' }}>
-    {error}
-  </div>
-)}
+            <div className="mb-6 p-4 bg-red-900/20 border border-red-500 rounded-lg text-red-400 text-sm" style={{ fontFamily: '"Poppins", sans-serif' }}>
+              {error}
+            </div>
+          )}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {[...Array(6)].map((_, index) => (
               <div key={index} className="bg-gray-900 rounded-2xl overflow-hidden animate-pulse">
@@ -458,6 +472,18 @@ const ThirdSection = ({ onCreateEvent }) => {
                         >
                           <Trash2 className="w-4 h-4 mr-2" />
                           Delete Event
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleCopySlug(event);
+                          }}
+                          className="flex items-center w-full text-left px-4 py-2 text-sm text-gray-200 hover:bg-gray-700 hover:text-white transition-colors"
+                          disabled={!event.slug}
+                          style={{ fontFamily: '"Poppins", sans-serif' }}
+                        >
+                          <Clipboard className="w-4 h-4 mr-2" />
+                          {copiedSlugId === event.id ? "Copied!" : event.slug ? "Copy Event URL" : "No URL Available"}
                         </button>
                       </motion.div>
                     )}

@@ -202,7 +202,7 @@ const CreateEvent = ({ onNavigate }) => {
       console.log("Creating event:", eventData)
 
       // Send to backend API
-      const response = await axios.post("https://genpay-sl25bd-1.onrender.com/api/events/create", eventData, {
+      const response = await axios.post("http://localhost:5000/api/events/create", eventData, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -342,438 +342,448 @@ const CreateEvent = ({ onNavigate }) => {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Basic Information Section */}
-          <div className="space-y-4">
-            <p className="text-white text-sm" style={{ fontFamily: '"Poppins", sans-serif' }}>
-              Let's start with your Event Name, Event Description, Event Location & Event URL
+      
+<form onSubmit={handleSubmit} className="space-y-6">
+  {/* Basic Information Section */}
+  <div className="space-y-4">
+    <p className="text-white text-sm" style={{ fontFamily: '"Poppins", sans-serif' }}>
+      Let's start with your Event Name, Event Description, Event Location & Event URL
+    </p>
+
+    {/* Event Name */}
+    <div>
+      <input
+        type="text"
+        placeholder="Event Name"
+        value={formData.eventName}
+        onChange={(e) => handleInputChange("eventName", e.target.value)}
+        maxLength={100}
+        className="w-full px-4 py-3 bg-transparent border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-gray-400 transition-colors text-sm"
+        style={{ fontFamily: '"Poppins", sans-serif', borderRadius: "15px 15px 15px 0px" }}
+      />
+      {errors.eventName && (
+        <p className="text-red-400 text-xs mt-1" style={{ fontFamily: '"Poppins", sans-serif' }}>
+          {errors.eventName}
+        </p>
+      )}
+    </div>
+
+    {/* Event Description and Event Location in 2 columns */}
+    <div className="grid gap-3">
+      <div>
+        <textarea
+          placeholder="Event Description"
+          value={formData.eventDescription}
+          onChange={(e) => handleInputChange("eventDescription", e.target.value)}
+          rows={4}
+          maxLength={500}
+          className="w-full px-4 py-3 bg-transparent border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-gray-400 transition-colors text-sm resize-none"
+          style={{ fontFamily: '"Poppins", sans-serif', borderRadius: "15px 15px 15px 0px" }}
+        />
+        {errors.eventDescription && (
+          <p className="text-red-400 text-xs mt-1" style={{ fontFamily: '"Poppins", sans-serif' }}>
+            {errors.eventDescription}
+          </p>
+        )}
+      </div>
+
+      <div className="space-y-3">
+        <input
+          type="text"
+          placeholder="Event Location"
+          value={formData.eventLocation}
+          onChange={(e) => handleInputChange("eventLocation", e.target.value)}
+          maxLength={200}
+          className="w-full px-4 py-3 bg-transparent border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-gray-400 transition-colors text-sm"
+          style={{ fontFamily: '"Poppins", sans-serif', borderRadius: "15px 15px 15px 0px" }}
+        />
+        {errors.eventLocation && (
+          <p className="text-red-400 text-xs mt-1" style={{ fontFamily: '"Poppins", sans-serif' }}>
+            {errors.eventLocation}
+          </p>
+        )}
+
+        <input
+          type="text"
+          placeholder="Location Tips (e.g adjacent Koko Dome, Ibadan)"
+          value={formData.eventLocationTips}
+          onChange={(e) => handleInputChange("eventLocationTips", e.target.value)}
+          maxLength={200}
+          className="w-full px-4 py-3 bg-transparent border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-gray-400 transition-colors text-sm"
+          style={{ fontFamily: '"Poppins", sans-serif', borderRadius: "15px 15px 15px 0px" }}
+        />
+      </div>
+    </div>
+
+    {/* Event URL - Responsive Layout */}
+    <div className="space-y-3">
+      {/* Non-editable full URL display */}
+      <div>
+        <div
+          className="w-full px-4 py-3 border border-gray-600 text-gray-400 text-sm bg-gray-800/50 cursor-not-allowed break-all"
+          style={{ fontFamily: '"Poppins", sans-serif', borderRadius: "15px 15px 15px 0px" }}
+        >
+          {generateUrlPlaceholder()}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {/* Category and Dates Section */}
+  <div className="space-y-6">
+    <p className="text-white text-sm" style={{ fontFamily: '"Poppins", sans-serif' }}>
+      Now let's go on with your Event Category, Event Dates, & Event Socials
+    </p>
+
+    {/* Event Category */}
+    <div>
+      <select
+        value={formData.eventCategory}
+        onChange={(e) => handleInputChange("eventCategory", e.target.value)}
+        className="w-full px-4 py-3 bg-transparent border border-gray-700 text-white focus:outline-none focus:border-gray-500 transition-colors text-sm appearance-none"
+        style={{
+          fontFamily: '"Poppins", sans-serif',
+          backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23BD6666' strokeLinecap='round' strokeLinejoin='round' strokeWidth='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
+          backgroundPosition: "right 12px center",
+          backgroundRepeat: "no-repeat",
+          backgroundSize: "25px",
+          borderRadius: "15px 15px 15px 0px",
+        }}
+      >
+        <option value="" disabled className="bg-gray-800 text-gray-400">
+          Event Category
+        </option>
+        {eventCategories.map((category, index) => (
+          <option key={index} value={category} className="bg-gray-800 text-white">
+            {category}
+          </option>
+        ))}
+      </select>
+      {errors.eventCategory && (
+        <p className="text-red-400 text-xs mt-1" style={{ fontFamily: '"Poppins", sans-serif' }}>
+          {errors.eventCategory}
+        </p>
+      )}
+    </div>
+
+    {/* Start Date and Time */}
+    <div className="space-y-4">
+      <div className="flex items-center space-x-2">
+        <span className="text-orange-500 text-sm">*</span>
+        <h4 className="text-white text-sm font-medium" style={{ fontFamily: '"Poppins", sans-serif' }}>
+          Start date
+        </h4>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Start Date Input */}
+        <div className="relative">
+          <div
+            className="absolute left-3 top-1/2 transform -translate-y-1/2 z-10 cursor-pointer hover:text-gray-300 transition-colors"
+            onClick={() => startDateRef.current?.showPicker?.() || startDateRef.current?.click()}
+          >
+            <Calendar className="w-4 h-4 text-gray-400" />
+          </div>
+          <input
+            ref={startDateRef}
+            type="date"
+            value={formData.startDate}
+            min={formatDateForInput(new Date())}
+            onChange={(e) => handleInputChange("startDate", e.target.value)}
+            className="w-full pl-10 pr-4 py-4 bg-transparent border border-gray-600 rounded-lg text-white focus:outline-none focus:border-gray-400 transition-colors text-sm [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-3 [&::-webkit-calendar-picker-indicator]:w-5 [&::-webkit-calendar-picker-indicator]:h-5 [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+            style={{
+              fontFamily: '"Poppins", sans-serif',
+              borderRadius: "15px 15px 15px 0px",
+              colorScheme: "dark",
+            }}
+          />
+          {!formData.startDate && (
+            <div className="absolute left-10 top-1/2 transform -translate-y-1/2 pointer-events-none text-gray-500 text-sm">
+              Start Date
+            </div>
+          )}
+          {errors.startDate && (
+            <p className="text-red-400 text-xs mt-1" style={{ fontFamily: '"Poppins", sans-serif' }}>
+              {errors.startDate}
             </p>
+          )}
+        </div>
 
-            {/* Event Name */}
-            <div>
-              <input
-                type="text"
-                placeholder="Event Name"
-                value={formData.eventName}
-                onChange={(e) => handleInputChange("eventName", e.target.value)}
-                className="w-full px-4 py-3 bg-transparent border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-gray-400 transition-colors text-sm"
-                style={{ fontFamily: '"Poppins", sans-serif', borderRadius: "15px 15px 15px 0px" }}
-              />
-              {errors.eventName && (
-                <p className="text-red-400 text-xs mt-1" style={{ fontFamily: '"Poppins", sans-serif' }}>
-                  {errors.eventName}
-                </p>
-              )}
-            </div>
-
-            {/* Event Description and Event Location in 2 columns */}
-            <div className="grid gap-3">
-              <div>
-                <textarea
-                  placeholder="Event Description"
-                  value={formData.eventDescription}
-                  onChange={(e) => handleInputChange("eventDescription", e.target.value)}
-                  rows={4}
-                  className="w-full px-4 py-3 bg-transparent border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-gray-400 transition-colors text-sm resize-none"
-                  style={{ fontFamily: '"Poppins", sans-serif', borderRadius: "15px 15px 15px 0px" }}
-                />
-                {errors.eventDescription && (
-                  <p className="text-red-400 text-xs mt-1" style={{ fontFamily: '"Poppins", sans-serif' }}>
-                    {errors.eventDescription}
-                  </p>
-                )}
-              </div>
-
-              <div className="space-y-3">
-                <input
-                  type="text"
-                  placeholder="Event Location"
-                  value={formData.eventLocation}
-                  onChange={(e) => handleInputChange("eventLocation", e.target.value)}
-                  className="w-full px-4 py-3 bg-transparent border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-gray-400 transition-colors text-sm"
-                  style={{ fontFamily: '"Poppins", sans-serif', borderRadius: "15px 15px 15px 0px" }}
-                />
-                {errors.eventLocation && (
-                  <p className="text-red-400 text-xs mt-1" style={{ fontFamily: '"Poppins", sans-serif' }}>
-                    {errors.eventLocation}
-                  </p>
-                )}
-
-                <input
-                  type="text"
-                  placeholder="Location Tips (e.g adjacent Koko Dome, Ibadan)"
-                  value={formData.eventLocationTips}
-                  onChange={(e) => handleInputChange("eventLocationTips", e.target.value)}
-                  className="w-full px-4 py-3 bg-transparent border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-gray-400 transition-colors text-sm"
-                  style={{ fontFamily: '"Poppins", sans-serif', borderRadius: "15px 15px 15px 0px" }}
-                />
-              </div>
-            </div>
-
-            {/* Event URL - Responsive Layout */}
-            <div className="space-y-3">
-              {/* Non-editable full URL display */}
-              <div>
-                <div
-                  className="w-full px-4 py-3 border border-gray-600 text-gray-400 text-sm bg-gray-800/50 cursor-not-allowed break-all"
-                  style={{ fontFamily: '"Poppins", sans-serif', borderRadius: "15px 15px 15px 0px" }}
-                >
-                  {generateUrlPlaceholder()}
-                </div>
-              </div>
-            </div>
+        {/* Start Time Input */}
+        <div className="relative">
+          <div
+            className="absolute left-3 top-1/2 transform -translate-y-1/2 z-10 cursor-pointer hover:text-gray-300 transition-colors"
+            onClick={() => startTimeRef.current?.showPicker?.() || startTimeRef.current?.click()}
+          >
+            <Clock className="w-4 h-4 text-gray-400" />
           </div>
-
-          {/* Category and Dates Section */}
-          <div className="space-y-6">
-            <p className="text-white text-sm" style={{ fontFamily: '"Poppins", sans-serif' }}>
-              Now let's go on with your Event Category, Event Dates, & Event Socials
+          <input
+            ref={startTimeRef}
+            type="time"
+            value={formData.startTime}
+            onChange={(e) => handleInputChange("startTime", e.target.value)}
+            className="w-full pl-10 pr-4 py-4 bg-transparent border border-gray-600 rounded-lg text-white focus:outline-none focus:border-gray-400 transition-colors text-sm [&::-webkit-calendar-picker-indicator]:opacity-0"
+            style={{
+              fontFamily: '"Poppins", sans-serif',
+              borderRadius: "15px 15px 15px 0px",
+              colorScheme: "dark",
+            }}
+          />
+          {!formData.startTime && (
+            <div className="absolute left-10 top-1/2 transform -translate-y-1/2 pointer-events-none text-gray-500 text-sm">
+              Start Time
+            </div>
+          )}
+          {errors.startTime && (
+            <p className="text-red-400 text-xs mt-1" style={{ fontFamily: '"Poppins", sans-serif' }}>
+              {errors.startTime}
             </p>
+          )}
+        </div>
+      </div>
+    </div>
 
-            {/* Event Category */}
-            <div>
-              <select
-                value={formData.eventCategory}
-                onChange={(e) => handleInputChange("eventCategory", e.target.value)}
-                className="w-full px-4 py-3 bg-transparent border border-gray-700 text-white focus:outline-none focus:border-gray-500 transition-colors text-sm appearance-none"
-                style={{
-                  fontFamily: '"Poppins", sans-serif',
-                  backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23BD6666' strokeLinecap='round' strokeLinejoin='round' strokeWidth='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
-                  backgroundPosition: "right 12px center",
-                  backgroundRepeat: "no-repeat",
-                  backgroundSize: "25px",
-                  borderRadius: "15px 15px 15px 0px",
-                }}
-              >
-                <option value="" disabled className="bg-gray-800 text-gray-400">
-                  Event Category
-                </option>
-                {eventCategories.map((category, index) => (
-                  <option key={index} value={category} className="bg-gray-800 text-white">
-                    {category}
-                  </option>
-                ))}
-              </select>
-              {errors.eventCategory && (
-                <p className="text-red-400 text-xs mt-1" style={{ fontFamily: '"Poppins", sans-serif' }}>
-                  {errors.eventCategory}
-                </p>
-              )}
-            </div>
+    {/* End Date and Time */}
+    <div className="space-y-4">
+      <div className="flex items-center space-x-2">
+        <span className="text-orange-500 text-sm">*</span>
+        <h4 className="text-white text-sm font-medium" style={{ fontFamily: '"Poppins", sans-serif' }}>
+          End date
+        </h4>
+      </div>
 
-            {/* Start Date and Time */}
-            <div className="space-y-4">
-              <div className="flex items-center space-x-2">
-                <span className="text-orange-500 text-sm">*</span>
-                <h4 className="text-white text-sm font-medium" style={{ fontFamily: '"Poppins", sans-serif' }}>
-                  Start date
-                </h4>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Start Date Input */}
-                <div className="relative">
-                  <div
-                    className="absolute left-3 top-1/2 transform -translate-y-1/2 z-10 cursor-pointer hover:text-gray-300 transition-colors"
-                    onClick={() => startDateRef.current?.showPicker?.() || startDateRef.current?.click()}
-                  >
-                    <Calendar className="w-4 h-4 text-gray-400" />
-                  </div>
-                  <input
-                    ref={startDateRef}
-                    type="date"
-                    value={formData.startDate}
-                    min={formatDateForInput(new Date())} // Prevent past dates
-                    onChange={(e) => handleInputChange("startDate", e.target.value)}
-                    className="w-full pl-10 pr-4 py-4 bg-transparent border border-gray-600 rounded-lg text-white focus:outline-none focus:border-gray-400 transition-colors text-sm [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-3 [&::-webkit-calendar-picker-indicator]:w-5 [&::-webkit-calendar-picker-indicator]:h-5 [&::-webkit-calendar-picker-indicator]:cursor-pointer"
-                    style={{
-                      fontFamily: '"Poppins", sans-serif',
-                      borderRadius: "15px 15px 15px 0px",
-                      colorScheme: "dark",
-                    }}
-                  />
-                  {!formData.startDate && (
-                    <div className="absolute left-10 top-1/2 transform -translate-y-1/2 pointer-events-none text-gray-500 text-sm">
-                      Start Date
-                    </div>
-                  )}
-                  {errors.startDate && (
-                    <p className="text-red-400 text-xs mt-1" style={{ fontFamily: '"Poppins", sans-serif' }}>
-                      {errors.startDate}
-                    </p>
-                  )}
-                </div>
-
-                {/* Start Time Input */}
-                <div className="relative">
-                  <div
-                    className="absolute left-3 top-1/2 transform -translate-y-1/2 z-10 cursor-pointer hover:text-gray-300 transition-colors"
-                    onClick={() => startTimeRef.current?.showPicker?.() || startTimeRef.current?.click()}
-                  >
-                    <Clock className="w-4 h-4 text-gray-400" />
-                  </div>
-                  <input
-                    ref={startTimeRef}
-                    type="time"
-                    value={formData.startTime}
-                    onChange={(e) => handleInputChange("startTime", e.target.value)}
-                    className="w-full pl-10 pr-4 py-4 bg-transparent border border-gray-600 rounded-lg text-white focus:outline-none focus:border-gray-400 transition-colors text-sm [&::-webkit-calendar-picker-indicator]:opacity-0"
-                    style={{
-                      fontFamily: '"Poppins", sans-serif',
-                      borderRadius: "15px 15px 15px 0px",
-                      colorScheme: "dark",
-                    }}
-                  />
-                  {!formData.startTime && (
-                    <div className="absolute left-10 top-1/2 transform -translate-y-1/2 pointer-events-none text-gray-500 text-sm">
-                      Start Time
-                    </div>
-                  )}
-                  {errors.startTime && (
-                    <p className="text-red-400 text-xs mt-1" style={{ fontFamily: '"Poppins", sans-serif' }}>
-                      {errors.startTime}
-                    </p>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* End Date and Time */}
-            <div className="space-y-4">
-              <div className="flex items-center space-x-2">
-                <span className="text-orange-500 text-sm">*</span>
-                <h4 className="text-white text-sm font-medium" style={{ fontFamily: '"Poppins", sans-serif' }}>
-                  End date
-                </h4>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* End Date Input */}
-                <div className="relative">
-                  <div
-                    className="absolute left-3 top-1/2 transform -translate-y-1/2 z-10 cursor-pointer hover:text-gray-300 transition-colors"
-                    onClick={() => endDateRef.current?.showPicker?.() || endDateRef.current?.click()}
-                  >
-                    <Calendar className="w-4 h-4 text-gray-400" />
-                  </div>
-                  <input
-                    ref={endDateRef}
-                    type="date"
-                    value={formData.endDate}
-                    min={formData.startDate || formatDateForInput(new Date())} // Restrict to startDate or later
-                    onChange={(e) => handleInputChange("endDate", e.target.value)}
-                    className="w-full pl-10 pr-4 py-4 bg-transparent border border-gray-600 rounded-lg text-white focus:outline-none focus:border-gray-400 transition-colors text-sm [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-3 [&::-webkit-calendar-picker-indicator]:w-5 [&::-webkit-calendar-picker-indicator]:h-5 [&::-webkit-calendar-picker-indicator]:cursor-pointer"
-                    style={{
-                      fontFamily: '"Poppins", sans-serif',
-                      borderRadius: "15px 15px 15px 0px",
-                      colorScheme: "dark",
-                    }}
-                  />
-                  {!formData.endDate && (
-                    <div className="absolute left-10 top-1/2 transform -translate-y-1/2 pointer-events-none text-gray-500 text-sm">
-                      {formData.startDate ? "End Date" : "Select start date first"}
-                    </div>
-                  )}
-                  {errors.endDate && (
-                    <p className="text-red-400 text-xs mt-1" style={{ fontFamily: '"Poppins", sans-serif' }}>
-                      {errors.endDate}
-                    </p>
-                  )}
-                </div>
-
-                {/* End Time Input */}
-                <div className="relative">
-                  <div
-                    className="absolute left-3 top-1/2 transform -translate-y-1/2 z-10 cursor-pointer hover:text-gray-300 transition-colors"
-                    onClick={() => endTimeRef.current?.showPicker?.() || endTimeRef.current?.click()}
-                  >
-                    <Clock className="w-4 h-4 text-gray-400" />
-                  </div>
-                  <input
-                    ref={endTimeRef}
-                    type="time"
-                    value={formData.endTime}
-                    min={
-                      formData.startDate && formData.endDate && formData.startDate === formData.endDate
-                        ? formData.startTime
-                        : undefined
-                    } // Restrict endTime if same date
-                    onChange={(e) => handleInputChange("endTime", e.target.value)}
-                    className="w-full pl-10 pr-4 py-4 bg-transparent border border-gray-600 rounded-lg text-white focus:outline-none focus:border-gray-400 transition-colors text-sm [&::-webkit-calendar-picker-indicator]:opacity-0"
-                    style={{
-                      fontFamily: '"Poppins", sans-serif',
-                      borderRadius: "15px 15px 15px 0px",
-                      colorScheme: "dark",
-                    }}
-                  />
-                  {!formData.endTime && (
-                    <div className="absolute left-10 top-1/2 transform -translate-y-1/2 pointer-events-none text-gray-500 text-sm">
-                      End Time
-                    </div>
-                  )}
-                  {errors.endTime && (
-                    <p className="text-red-400 text-xs mt-1" style={{ fontFamily: '"Poppins", sans-serif' }}>
-                      {errors.endTime}
-                    </p>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Date/Time Error */}
-            {dateTimeError && (
-              <div className="flex items-start space-x-3 p-4 bg-red-900/20 border border-red-500/30 rounded-lg">
-                <AlertTriangle className="w-5 h-5 text-red-400 mt-0.5 flex-shrink-0" />
-                <p className="text-red-400 text-sm" style={{ fontFamily: '"Poppins", sans-serif' }}>
-                  {dateTimeError}
-                </p>
-              </div>
-            )}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* End Date Input */}
+        <div className="relative">
+          <div
+            className="absolute left-3 top-1/2 transform -translate-y-1/2 z-10 cursor-pointer hover:text-gray-300 transition-colors"
+            onClick={() => endDateRef.current?.showPicker?.() || endDateRef.current?.click()}
+          >
+            <Calendar className="w-4 h-4 text-gray-400" />
           </div>
-
-          {/* Socials Section */}
-          <div className="space-y-4">
-            <h3 className="text-white text-sm" style={{ fontFamily: '"Poppins", sans-serif' }}>
-              Socials
-            </h3>
-
-            {/* Instagram URL */}
-            <div className="relative">
-              <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
-                <Instagram className="w-4 h-4 text-gray-400" />
-              </div>
-              <input
-                type="url"
-                placeholder="Instagram URL"
-                value={formData.instagramUrl}
-                onChange={(e) => handleInputChange("instagramUrl", e.target.value)}
-                className="w-full pl-10 pr-4 py-3 bg-transparent border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-gray-400 transition-colors text-sm"
-                style={{ fontFamily: '"Poppins", sans-serif', borderRadius: "15px 15px 15px 0px" }}
-              />
-              {errors.instagramUrl && (
-                <p className="text-red-400 text-xs mt-1" style={{ fontFamily: '"Poppins", sans-serif' }}>
-                  {errors.instagramUrl}
-                </p>
-              )}
+          <input
+            ref={endDateRef}
+            type="date"
+            value={formData.endDate}
+            min={formData.startDate || formatDateForInput(new Date())}
+            onChange={(e) => handleInputChange("endDate", e.target.value)}
+            className="w-full pl-10 pr-4 py-4 bg-transparent border border-gray-600 rounded-lg text-white focus:outline-none focus:border-gray-400 transition-colors text-sm [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-3 [&::-webkit-calendar-picker-indicator]:w-5 [&::-webkit-calendar-picker-indicator]:h-5 [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+            style={{
+              fontFamily: '"Poppins", sans-serif',
+              borderRadius: "15px 15px 15px 0px",
+              colorScheme: "dark",
+            }}
+          />
+          {!formData.endDate && (
+            <div className="absolute left-10 top-1/2 transform -translate-y-1/2 pointer-events-none text-gray-500 text-sm">
+              {formData.startDate ? "End Date" : "Select start date first"}
             </div>
+          )}
+          {errors.endDate && (
+            <p className="text-red-400 text-xs mt-1" style={{ fontFamily: '"Poppins", sans-serif' }}>
+              {errors.endDate}
+            </p>
+          )}
+        </div>
 
-            {/* X (Twitter) URL */}
-            <div className="relative">
-              <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
-                <Twitter className="w-4 h-4 text-gray-400" />
-              </div>
-              <input
-                type="url"
-                placeholder="X (Twitter) URL"
-                value={formData.twitterUrl}
-                onChange={(e) => handleInputChange("twitterUrl", e.target.value)}
-                className="w-full pl-10 pr-4 py-3 bg-transparent border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-gray-400 transition-colors text-sm"
-                style={{ fontFamily: '"Poppins", sans-serif', borderRadius: "15px 15px 15px 0px" }}
-              />
-              {errors.twitterUrl && (
-                <p className="text-red-400 text-xs mt-1" style={{ fontFamily: '"Poppins", sans-serif' }}>
-                  {errors.twitterUrl}
-                </p>
-              )}
-            </div>
-
-            {/* Snapchat URL */}
-            <div className="relative">
-              <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
-                <Camera className="w-4 h-4 text-gray-400" />
-              </div>
-              <input
-                type="url"
-                placeholder="Snapchat URL"
-                value={formData.snapchatUrl}
-                onChange={(e) => handleInputChange("snapchatUrl", e.target.value)}
-                className="w-full pl-10 pr-4 py-3 bg-transparent border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-gray-400 transition-colors text-sm"
-                style={{ fontFamily: '"Poppins", sans-serif', borderRadius: "15px 15px 15px 0px" }}
-              />
-              {errors.snapchatUrl && (
-                <p className="text-red-400 text-xs mt-1" style={{ fontFamily: '"Poppins", sans-serif' }}>
-                  {errors.snapchatUrl}
-                </p>
-              )}
-            </div>
-
-            {/* TikTok URL */}
-            <div className="relative">
-              <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
-                <svg className="w-4 h-4 text-gray-400" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z" />
-                </svg>
-              </div>
-              <input
-                type="url"
-                placeholder="TikTok URL"
-                value={formData.tiktokUrl}
-                onChange={(e) => handleInputChange("tiktokUrl", e.target.value)}
-                className="w-full pl-10 pr-4 py-3 bg-transparent border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-gray-400 transition-colors text-sm"
-                style={{ fontFamily: '"Poppins", sans-serif', borderRadius: "15px 15px 15px 0px" }}
-              />
-              {errors.tiktokUrl && (
-                <p className="text-red-400 text-xs mt-1" style={{ fontFamily: '"Poppins", sans-serif' }}>
-                  {errors.tiktokUrl}
-                </p>
-              )}
-            </div>
-
-            {/* Website URL */}
-            <div className="relative">
-              <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
-                <Globe className="w-4 h-4 text-gray-400" />
-              </div>
-              <input
-                type="url"
-                placeholder="Website URL"
-                value={formData.websiteUrl}
-                onChange={(e) => handleInputChange("websiteUrl", e.target.value)}
-                className="w-full pl-10 pr-4 py-3 bg-transparent border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-gray-400 transition-colors text-sm"
-                style={{ fontFamily: '"Poppins", sans-serif', borderRadius: "15px 15px 15px 0px" }}
-              />
-              {errors.websiteUrl && (
-                <p className="text-red-400 text-xs mt-1" style={{ fontFamily: '"Poppins", sans-serif' }}>
-                  {errors.websiteUrl}
-                </p>
-              )}
-            </div>
+        {/* End Time Input */}
+        <div className="relative">
+          <div
+            className="absolute left-3 top-1/2 transform -translate-y-1/2 z-10 cursor-pointer hover:text-gray-300 transition-colors"
+            onClick={() => endTimeRef.current?.showPicker?.() || endTimeRef.current?.click()}
+          >
+            <Clock className="w-4 h-4 text-gray-400" />
           </div>
+          <input
+            ref={endTimeRef}
+            type="time"
+            value={formData.endTime}
+            min={
+              formData.startDate && formData.endDate && formData.startDate === formData.endDate
+                ? formData.startTime
+                : undefined
+            }
+            onChange={(e) => handleInputChange("endTime", e.target.value)}
+            className="w-full pl-10 pr-4 py-4 bg-transparent border border-gray-600 rounded-lg text-white focus:outline-none focus:border-gray-400 transition-colors text-sm [&::-webkit-calendar-picker-indicator]:opacity-0"
+            style={{
+              fontFamily: '"Poppins", sans-serif',
+              borderRadius: "15px 15px 15px 0px",
+              colorScheme: "dark",
+            }}
+          />
+          {!formData.endTime && (
+            <div className="absolute left-10 top-1/2 transform -translate-y-1/2 pointer-events-none text-gray-500 text-sm">
+              End Time
+            </div>
+          )}
+          {errors.endTime && (
+            <p className="text-red-400 text-xs mt-1" style={{ fontFamily: '"Poppins", sans-serif' }}>
+              {errors.endTime}
+            </p>
+          )}
+        </div>
+      </div>
+    </div>
 
-          {/* Action Buttons */}
-          <div className="flex gap-4 pt-6">
-            {/* Cancel Button */}
-            <button
-              type="button"
-              onClick={handleCancel}
-              className="flex-1 py-3 text-gray-400 hover:text-white font-medium transition-all duration-200 text-sm border border-gray-600 rounded-lg hover:border-gray-500 bg-gray-800"
-              style={{ fontFamily: '"Poppins", sans-serif', borderRadius: "15px 15px 15px 0px" }}
-            >
-              Cancel
-            </button>
+    {/* Date/Time Error */}
+    {dateTimeError && (
+      <div className="flex items-start space-x-3 p-4 bg-red-900/20 border border-red-500/30 rounded-lg">
+        <AlertTriangle className="w-5 h-5 text-red-400 mt-0.5 flex-shrink-0" />
+        <p className="text-red-400 text-sm" style={{ fontFamily: '"Poppins", sans-serif' }}>
+          {dateTimeError}
+        </p>
+      </div>
+    )}
+  </div>
 
-            {/* Continue Button */}
-            <button
-              type="submit"
-              disabled={isSubmitting || dateTimeError}
-              className="flex-1 py-3 text-white font-medium transition-all duration-200 hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed text-sm rounded-lg flex items-center justify-center"
-              style={{
-                background: "linear-gradient(135deg, #A228AF 0%, #FF0000 100%)",
-                fontFamily: '"Poppins", sans-serif',
-                borderRadius: "15px 15px 15px 0px",
-              }}
-            >
-              {isSubmitting ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                  Creating...
-                </>
-              ) : (
-                "Continue"
-              )}
-            </button>
-          </div>
-        </form>
+  {/* Socials Section */}
+  <div className="space-y-4">
+    <h3 className="text-white text-sm" style={{ fontFamily: '"Poppins", sans-serif' }}>
+      Socials
+    </h3>
+
+    {/* Instagram URL */}
+    <div className="relative">
+      <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
+        <Instagram className="w-4 h-4 text-gray-400" />
+      </div>
+      <input
+        type="url"
+        placeholder="Instagram URL"
+        value={formData.instagramUrl}
+        onChange={(e) => handleInputChange("instagramUrl", e.target.value)}
+        maxLength={255}
+        className="w-full pl-10 pr-4 py-3 bg-transparent border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-gray-400 transition-colors text-sm"
+        style={{ fontFamily: '"Poppins", sans-serif', borderRadius: "15px 15px 15px 0px" }}
+      />
+      {errors.instagramUrl && (
+        <p className="text-red-400 text-xs mt-1" style={{ fontFamily: '"Poppins", sans-serif' }}>
+          {errors.instagramUrl}
+        </p>
+      )}
+    </div>
+
+    {/* X (Twitter) URL */}
+    <div className="relative">
+      <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
+        <Twitter className="w-4 h-4 text-gray-400" />
+      </div>
+      <input
+        type="url"
+        placeholder="X (Twitter) URL"
+        value={formData.twitterUrl}
+        onChange={(e) => handleInputChange("twitterUrl", e.target.value)}
+        maxLength={255}
+        className="w-full pl-10 pr-4 py-3 bg-transparent border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-gray-400 transition-colors text-sm"
+        style={{ fontFamily: '"Poppins", sans-serif', borderRadius: "15px 15px 15px 0px" }}
+      />
+      {errors.twitterUrl && (
+        <p className="text-red-400 text-xs mt-1" style={{ fontFamily: '"Poppins", sans-serif' }}>
+          {errors.twitterUrl}
+        </p>
+      )}
+    </div>
+
+    {/* Snapchat URL */}
+    <div className="relative">
+      <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
+        <Camera className="w-4 h-4 text-gray-400" />
+      </div>
+      <input
+        type="url"
+        placeholder="Snapchat URL"
+        value={formData.snapchatUrl}
+        onChange={(e) => handleInputChange("snapchatUrl", e.target.value)}
+        maxLength={255}
+        className="w-full pl-10 pr-4 py-3 bg-transparent border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-gray-400 transition-colors text-sm"
+        style={{ fontFamily: '"Poppins", sans-serif', borderRadius: "15px 15px 15px 0px" }}
+      />
+      {errors.snapchatUrl && (
+        <p className="text-red-400 text-xs mt-1" style={{ fontFamily: '"Poppins", sans-serif' }}>
+          {errors.snapchatUrl}
+        </p>
+      )}
+    </div>
+
+    {/* TikTok URL */}
+    <div className="relative">
+      <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
+        <svg className="w-4 h-4 text-gray-400" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z" />
+        </svg>
+      </div>
+      <input
+        type="url"
+        placeholder="TikTok URL"
+        value={formData.tiktokUrl}
+        onChange={(e) => handleInputChange("tiktokUrl", e.target.value)}
+        maxLength={255}
+        className="w-full pl-10 pr-4 py-3 bg-transparent border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-gray-400 transition-colors text-sm"
+        style={{ fontFamily: '"Poppins", sans-serif', borderRadius: "15px 15px 15px 0px" }}
+      />
+      {errors.tiktokUrl && (
+        <p className="text-red-400 text-xs mt-1" style={{ fontFamily: '"Poppins", sans-serif' }}>
+          {errors.tiktokUrl}
+        </p>
+      )}
+    </div>
+
+    {/* Website URL */}
+    <div className="relative">
+      <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
+        <Globe className="w-4 h-4 text-gray-400" />
+      </div>
+      <input
+        type="url"
+        placeholder="Website URL"
+        value={formData.websiteUrl}
+        onChange={(e) => handleInputChange("websiteUrl", e.target.value)}
+        maxLength={255}
+        className="w-full pl-10 pr-4 py-3 bg-transparent border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-gray-400 transition-colors text-sm"
+        style={{ fontFamily: '"Poppins", sans-serif', borderRadius: "15px 15px 15px 0px" }}
+      />
+      {errors.websiteUrl && (
+        <p className="text-red-400 text-xs mt-1" style={{ fontFamily: '"Poppins", sans-serif' }}>
+          {errors.websiteUrl}
+        </p>
+      )}
+    </div>
+  </div>
+
+  {/* Action Buttons */}
+  <div className="flex gap-4 pt-6">
+    {/* Cancel Button */}
+    <button
+      type="button"
+      onClick={handleCancel}
+      className="flex-1 py-3 text-gray-400 hover:text-white font-medium transition-all duration-200 text-sm border border-gray-600 rounded-lg hover:border-gray-500 bg-gray-800"
+      style={{ fontFamily: '"Poppins", sans-serif', borderRadius: "15px 15px 15px 0px" }}
+    >
+      Cancel
+    </button>
+
+    {/* Continue Button */}
+    <button
+      type="submit"
+      disabled={isSubmitting || dateTimeError}
+      className="flex-1 py-3 text-white font-medium transition-all duration-200 hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed text-sm rounded-lg flex items-center justify-center"
+      style={{
+        background: "linear-gradient(135deg, #A228AF 0%, #FF0000 100%)",
+        fontFamily: '"Poppins", sans-serif',
+        borderRadius: "15px 15px 15px 0px",
+      }}
+    >
+      {isSubmitting ? (
+        <>
+          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+          Creating...
+        </>
+      ) : (
+        "Continue"
+      )}
+    </button>
+  </div>
+</form>
       </div>
 
       {/* Toast Container */}

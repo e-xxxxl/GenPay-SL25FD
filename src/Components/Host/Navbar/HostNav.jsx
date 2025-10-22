@@ -26,7 +26,7 @@ const HostNav = () => {
     try {
       const token = localStorage.getItem("token")
       if (token) {
-        await fetch("https://genpay-sl25bd-1.onrender.com/api/host/logout", {  // Assuming logout endpoint for hosts
+        await fetch("http://localhost:5000/api/host/logout", {  // Assuming logout endpoint for hosts
           method: "POST",
           headers: {
             "Authorization": `Bearer ${token}`,

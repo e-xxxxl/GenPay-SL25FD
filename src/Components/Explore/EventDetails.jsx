@@ -20,8 +20,8 @@ const EventDetails = () => {
       try {
         setLoading(true);
         setError(null);
-        console.log('Fetching event:', `https://genpay-sl25bd-1.onrender.com/api/events/public/slug/${eventName}`);
-        const response = await fetch(`https://genpay-sl25bd-1.onrender.com/api/events/public/slug/${eventName}`, {
+        console.log('Fetching event:', `http://localhost:5000/api/events/public/slug/${eventName}`);
+        const response = await fetch(`http://localhost:5000/api/events/public/slug/${eventName}`, {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },
         });
@@ -401,7 +401,7 @@ const EventDetails = () => {
         )}
 
         <p className="text-gray-400 text-sm">
-          {attendees} people have bought tickets for {title}. Be one of them!
+          join those who have bought tickets for {title}. Be one of them!
         </p>
 
         {Array.isArray(event.tickets) && event.tickets.length > 0 ? (

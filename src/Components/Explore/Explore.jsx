@@ -19,9 +19,9 @@ const Explore = () => {
     try {
       setLoading(true);
       setError(null);
-      console.log('Fetching events from: https://genpay-sl25bd-1.onrender.com/api/events/public');
+      console.log('Fetching events from: http://localhost:5000/api/events/public');
 
-      const response = await fetch('https://genpay-sl25bd-1.onrender.com/api/events/public', {
+      const response = await fetch('http://localhost:5000/api/events/public', {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
       });
@@ -222,7 +222,9 @@ const Explore = () => {
         <div className="max-w-3xl mt-6">
           <div className="relative">
             <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">
-              <span role="img" aria-label="search">🔍</span>
+              <span class="material-symbols-outlined">
+search
+</span>
             </span>
             <input
               type="text"
@@ -334,7 +336,7 @@ const Explore = () => {
                 >
                   Quick find
                 </h4>
-                <span className="text-pink-400" aria-hidden>🔎</span>
+                
               </div>
 
               <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-2xl">
@@ -371,14 +373,17 @@ const Explore = () => {
                   <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">▾</span>
                 </div>
 
+              
+              </div>
+              <div className='mt-10'>
                 <button
                   onClick={() => fetchEvents()}
-                  className="w-full rounded-xl text-white font-medium px-6 py-3 bg-gradient-to-r from-pink-600 to-red-500 hover:opacity-90 transition"
+                  className="w-full "
                   style={{ fontFamily: '"Poppins", sans-serif' }}
                 >
-                  Search
+                  Refresh
                 </button>
-              </div>
+                </div>
             </div>
           </>
         )}
