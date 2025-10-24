@@ -138,7 +138,7 @@ const Footer = () => {
             <ul className="space-y-3">
               <li>
                 <a
-                  href="#"
+                  href="https://docs.google.com/forms/d/e/1FAIpQLSfjKkIwo8bBbIhRJLOJvD1YSTpvhy5LTGu_mFdy1nskE4IEEA/viewform"
                   className="text-gray-400 hover:text-white transition-colors duration-200 text-sm sm:text-base block py-1"
                   style={{ fontFamily: '"Poppins", sans-serif' }}
                 >

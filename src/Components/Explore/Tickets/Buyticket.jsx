@@ -288,11 +288,13 @@ const Buyticket = () => {
         ticketDescription: t.ticketDescription || (t.ticketType === 'Group' ? `Group ticket for ${t.groupSize || 'multiple'} people` : 'Includes charges'),
         groupSize: t.groupSize || null, // Include groupSize for group tickets
         quantity: typeof t.quantity === 'number' ? t.quantity : 0, // Available quantity
+        purchaseLimit: typeof t.purchaseLimit === 'number' ? t.purchaseLimit : null, // Purchase limit per user
+        transferFee: typeof t.transferFee === 'number' ? t.transferFee : 0, // Transfer fee if applicable
       }));
     }
     return [
-      { id: 'regular', name: 'Regular', price: 20000, ticketType: 'Individual', ticketDescription: 'Includes charges', groupSize: null, quantity: 0 },
-      { id: 'vip', name: 'VIP Ravers', price: 90000, ticketType: 'Individual', ticketDescription: 'For the premium experience', groupSize: null, quantity: 0 },
+      { id: 'regular', name: 'Regular', price: 20000, ticketType: 'Individual', ticketDescription: 'Includes charges', groupSize: null, quantity: 0, purchaseLimit: null },
+      { id: 'vip', name: 'VIP Ravers', price: 90000, ticketType: 'Individual', ticketDescription: 'For the premium experience', groupSize: null, quantity: 0, purchaseLimit: null },
     ];
   }, [event]);
 
@@ -309,7 +311,8 @@ const Buyticket = () => {
       const ticket = normalizedTickets.find((t) => t.id === id);
       const maxQuantity = ticket?.quantity || Infinity;
       const current = q[id] || 0;
-      if (current >= maxQuantity || ticket.quantity === 0) return q;
+      const purchaseLimit = ticket?.purchaseLimit || Infinity; // Use purchaseLimit or no limit if null
+      if (current >= maxQuantity || current >= purchaseLimit || ticket.quantity === 0) return q;
       return { ...q, [id]: current + 1 };
     });
   };
@@ -419,6 +422,11 @@ const Buyticket = () => {
                       {t.quantity > 0 && (
                         <p className="mt-1 text-gray-400 text-sm">
                           {`${t.quantity} ticket${t.quantity > 1 ? 's' : ''} left`}
+                        </p>
+                      )}
+                      {t.purchaseLimit !== null && t.purchaseLimit > 0 && (
+                        <p className="mt-1 text-gray-400 text-sm">
+                          Limit: {t.purchaseLimit} per person
                         </p>
                       )}
                     </div>
