@@ -40,6 +40,7 @@ import AdminDashboard from "./Components/Admin/AdminDashboard";
 import AdminRoute from "./Components/Admin/AdminRoute";
 import AboutUs from "./Components/Explore/AboutUs";
 import NotFound from "./Components/Explore/NotFound";
+import Contactus from "./Components/Explore/Contactus";
 
 function App() {
   return (
@@ -55,16 +56,16 @@ function App() {
         <Route path="/dashboard" element={ <ProtectedRoute> <HostDashPage /></ProtectedRoute>}/>
         <Route path="/shop" element={<ProtectedRoute><ShopPage/></ProtectedRoute>} />
         <Route path="/account" element={<AccountPage/>} />
-        <Route path="/account/edit" element={<EditInfoPage/>} />
-        <Route path="/reportissue" element={<IssuesPage/>} />
-        <Route path="/create-event" element={<CreateEventPage/>} />
-        <Route path="/create-event/upload-event-image" element={<UploadEventHeaderPage/>} />
-        <Route path="/create-event/upload-event-gallery" element={<UploadEventGalleryPage/>} />
-         <Route path="/event-details/:id" element={<EventDetailsPage/>} />
+        <Route path="/account/edit" element={<ProtectedRoute><EditInfoPage/></ProtectedRoute>} />
+        <Route path="/reportissue" element={<ProtectedRoute><IssuesPage/></ProtectedRoute>} />
+        <Route path="/create-event" element={<ProtectedRoute><CreateEventPage/></ProtectedRoute>} />
+        <Route path="/create-event/upload-event-image" element={<ProtectedRoute><UploadEventHeaderPage/></ProtectedRoute>} />
+        <Route path="/create-event/upload-event-gallery" element={<ProtectedRoute><UploadEventGalleryPage/></ProtectedRoute>} />
+         <Route path="/event-details/:id" element={<ProtectedRoute><EventDetailsPage/></ProtectedRoute>} />
         <Route path="/add-ticket/:id" element={<ProtectedRoute><AddTicketPage/></ProtectedRoute>} />
         <Route path="/ticket-list/:id" element={<ProtectedRoute><TicketListPage/></ProtectedRoute>} />
         <Route path="/sales/:id" element={<ProtectedRoute><Sales/></ProtectedRoute>} />
-        <Route path="/edit-ticket/:id/:ticketId" element={<EditTicketPage />} />
+        <Route path="/edit-ticket/:id/:ticketId" element={<ProtectedRoute><EditTicketPage /></ProtectedRoute>} />
          <Route path="/explore" element={<ExplorePage />} />
          <Route path="/explore/:eventName" element={<ExploreEventDetailsPage />} />
          
@@ -74,8 +75,9 @@ function App() {
         <Route path="/checkout/success" element={<Success/>} />
         <Route path="/legal" element={<LegalDocumentation/>} />
         <Route path="/legal/refund-policy" element={<RefundPolicy/>} />
-        <Route path="/wallet" element={<WalletPage/>} />
+        <Route path="/wallet" element={<ProtectedRoute><WalletPage/></ProtectedRoute>} />
         <Route path="/aboutus" element={<AboutUs/>} />
+        <Route path="/contactus" element={<Contactus/>} />
         <Route path="*" element={<NotFound/>} />
 
         {/* Admin Routes */}
