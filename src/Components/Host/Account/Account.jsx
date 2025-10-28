@@ -30,7 +30,7 @@ const Account = () => {
   const deleteModalRef = useRef(null)
 
   // Base URL for API (use environment variable in production)
-  const API_BASE_URL = import.meta.env.REACT_APP_API_URL || "https://genpay-sl25bd-1.onrender.com";
+  const API_BASE_URL = import.meta.env.REACT_APP_API_URL || "http://localhost:5000";
 
   // Email masking function
   const maskEmail = (email) => {

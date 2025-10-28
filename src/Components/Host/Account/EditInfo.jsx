@@ -83,7 +83,7 @@ const EditInfo = ({ onNavigate }) => {
           throw new Error("No authentication token found")
         }
 
-        const response = await axios.get("https://genpay-sl25bd-1.onrender.com/api/auth/me", {
+        const response = await axios.get("http://localhost:5000/api/auth/me", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -205,7 +205,7 @@ const EditInfo = ({ onNavigate }) => {
       // Exclude email from the update payload since it's read-only
       const { email, ...updateData } = formData
 
-      const response = await axios.put("https://genpay-sl25bd-1.onrender.com/api/auth/update-profile", updateData, {
+      const response = await axios.put("http://localhost:5000/api/auth/update-profile", updateData, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",

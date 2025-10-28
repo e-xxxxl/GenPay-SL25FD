@@ -59,7 +59,7 @@ const Resetpassword = ({ onNavigate }) => {
 
     try {
       const response = await axios.post(
-        "https://genpay-sl25bd-1.onrender.com/api/auth/reset-password",
+        "http://localhost:5000/api/auth/reset-password",
         {
           token, // Include the token from URL
           newPassword: formData.newPassword,
