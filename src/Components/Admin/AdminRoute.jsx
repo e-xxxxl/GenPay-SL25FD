@@ -19,7 +19,7 @@ const AdminRoute = ({ children }) => {
 
       try {
         // Verify token with backend
-        const API_BASE_URL = import.meta.env.REACT_APP_API_URL || "http://localhost:5000"
+        const API_BASE_URL = import.meta.env.REACT_APP_API_URL || "https://genpay-sl25bd-1.onrender.com"
         const response = await fetch(`${API_BASE_URL}/api/admin/me`, {
           headers: {
             'Authorization': `Bearer ${token}`,

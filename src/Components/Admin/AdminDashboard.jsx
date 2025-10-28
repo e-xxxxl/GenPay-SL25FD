@@ -38,7 +38,7 @@ const AdminDashboard = () => {
     proofOfPayment: null
   })
 
-  const API_BASE_URL = import.meta.env.REACT_APP_API_URL || "http://localhost:5000"
+  const API_BASE_URL = import.meta.env.REACT_APP_API_URL || "https://genpay-sl25bd-1.onrender.com"
 
   useEffect(() => {
     const token = localStorage.getItem('adminToken')

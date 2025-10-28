@@ -72,7 +72,7 @@
 //       setIsProcessing(true);
 //       console.log('Paystack success response:', response);
 //       const reference = response.reference || response.trxref;
-//       const apiResponse = await fetch(`http://localhost:5000/api/events/${event._id}/purchase-ticket`, {
+//       const apiResponse = await fetch(`https://genpay-sl25bd-1.onrender.com/api/events/${event._id}/purchase-ticket`, {
 //         method: 'POST',
 //         headers: {
 //           'Content-Type': 'application/json',
@@ -424,7 +424,7 @@ const Payment = () => {
       setIsProcessing(true);
       console.log('Paystack success response:', response);
       const reference = response.reference || response.trxref;
-      const apiResponse = await fetch(`http://localhost:5000/api/events/${event._id}/purchase-ticket`, {
+      const apiResponse = await fetch(`https://genpay-sl25bd-1.onrender.com/api/events/${event._id}/purchase-ticket`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -486,7 +486,7 @@ const Payment = () => {
     try {
       setIsProcessing(true);
       const reference = `FREE_${new Date().getTime().toString()}`; // Unique reference for free events
-      const apiResponse = await fetch(`http://localhost:5000/api/events/${event._id}/purchase-ticket`, {
+      const apiResponse = await fetch(`https://genpay-sl25bd-1.onrender.com/api/events/${event._id}/purchase-ticket`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
