@@ -41,10 +41,12 @@ import AdminRoute from "./Components/Admin/AdminRoute";
 import AboutUs from "./Components/Explore/AboutUs";
 import NotFound from "./Components/Explore/NotFound";
 import Contactus from "./Components/Explore/Contactus";
+import ScrollToTop from "./Components/ProtectedRoute/ScrollToTop";
 
 function App() {
   return (
     <>
+    <ScrollToTop/>
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/signup" element={<SignUpPage />} />

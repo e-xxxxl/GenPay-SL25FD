@@ -408,7 +408,7 @@ const AdminDashboard = () => {
                   <div className="space-y-3">
                     <div className="flex justify-between">
                       <span className="text-gray-400">Genpay Cut:</span>
-                      <span className="text-white">{formatNaira(dashboardData?.genpaycut || 0)}</span>
+                      <span className="text-white">{formatNaira(dashboardData?.genpayCut || 0)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-400">Paystack Cut:</span>

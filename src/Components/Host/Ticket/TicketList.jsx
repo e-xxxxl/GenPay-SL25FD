@@ -224,7 +224,7 @@ const TicketList = () => {
         <div className="mb-6">
           <div className="flex items-center gap-3 mb-2">
             <button
-              onClick={() => navigate(-1)}
+              onClick={() => navigate(`/event-details/${id}`)}
               className="flex items-center justify-center h-8 w-8 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
             >
               <ArrowLeft className="h-4 w-4 text-white" />
