@@ -220,42 +220,56 @@ const EventDetails = () => {
     }
   }
 
-  const handleImageDelete = async (imageUrl, imageType) => {
-    try {
-      setIsSubmitting(true)
-      const token = localStorage.getItem("token")
-      if (!token) throw new Error("No authentication token found")
+ const handleImageDelete = async (imageUrl, imageType) => {
+  if (imageType === "header") return; // We removed header delete
 
-      const response = await fetch(`https://genpay-sl25bd-1.onrender.com/api/events/delete-${imageType}-image`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ eventId: id, imageUrl }),
-      })
+  try {
+    setIsSubmitting(true);
+    const token = localStorage.getItem("token")
+        if (!token) throw new Error("No authentication token found")
 
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.message || `HTTP error! status: ${response.status}`)
-      }
-
-      const data = await response.json()
-      if (data.status !== "success") throw new Error(data.message || "Failed to delete image")
-
-      if (imageType === "header") {
-        setHeaderImage(null)
-      } else {
-        setGalleryImages((prev) => prev.filter((img) => img !== imageUrl))
-      }
-
-      toast.success("Image deleted successfully!")
-    } catch (err) {
-      toast.error(err.message || "Failed to delete image")
-    } finally {
-      setIsSubmitting(false)
+    if (!token) {
+      toast.error("No authentication token found. Please log in.");
+      navigate("/login");
+      return;
     }
+
+    console.log("Deleting image:", imageUrl); // Debug
+    console.log("Token:", token); // Debug
+
+    const response = await fetch(`https://genpay-sl25bd-1.onrender.com/api/events/delete-gallery-image`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`, // Must be EXACT
+      },
+      body: JSON.stringify({
+        eventId: id,
+        imageUrl,
+      }),
+    });
+
+    // Log response for debugging
+    console.log("Response status:", response.status);
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      console.log("Error response:", errorData);
+      throw new Error(errorData.message || `HTTP ${response.status}`);
+    }
+
+    const data = await response.json();
+    if (data.status !== "success") throw new Error(data.message);
+
+    setGalleryImages((prev) => prev.filter((img) => img !== imageUrl));
+    toast.success("Gallery image deleted!");
+  } catch (err) {
+    console.error("Delete error:", err);
+    toast.error(err.message || "Failed to delete image");
+  } finally {
+    setIsSubmitting(false);
   }
+};
 
   const handleRemoveTicketTier = async (ticketId) => {
     try {
@@ -764,54 +778,45 @@ const EventDetails = () => {
           {/* Images Section */}
           <div className="lg:w-1/3 order-2 lg:order-1">
             <div className="space-y-6">
-              {/* Header Image */}
-              <div>
-                <h3 className="text-white text-lg font-medium mb-4" style={{ fontFamily: '"Poppins", sans-serif' }}>
-                  Header Image
-                </h3>
-                <div className="relative">
-                  {headerImage ? (
-                    <>
-                      <img
-                        src={headerImage}
-                        alt="Event header"
-                        className="w-full h-48 object-cover rounded-lg"
-                      />
-                      <button
-                        onClick={() => handleImageDelete(headerImage, "header")}
-                        className="absolute top-2 right-2 bg-gray-900/80 p-1 rounded-full text-red-400 hover:text-red-300 transition-colors"
-                        disabled={isSubmitting}
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                    </>
-                  ) : (
-                    <div className="w-full h-48 bg-gray-800 rounded-lg flex items-center justify-center">
-                      <span className="text-gray-400 text-sm" style={{ fontFamily: '"Poppins", sans-serif' }}>
-                        No header image
-                      </span>
-                    </div>
-                  )}
-                </div>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => handleImageUpload(e, "header")}
-                  className="hidden"
-                  id="header-upload"
-                  ref={headerFileInputRef}
-                  disabled={isSubmitting}
-                />
-                <label
-                  htmlFor="header-upload"
-                  className="mt-4 block border-2 border-dashed border-gray-600 rounded-lg p-4 text-center hover:border-gray-500 transition-colors cursor-pointer"
-                >
-                  <Upload className="w-6 h-6 text-gray-400 mx-auto mb-2" />
-                  <p className="text-gray-400 text-sm" style={{ fontFamily: '"Poppins", sans-serif' }}>
-                    {headerImage ? "Replace Header Image" : "Upload Header Image"}
-                  </p>
-                </label>
-              </div>
+             {/* Header Image */}
+<div>
+  <h3 className="text-white text-lg font-medium mb-4" style={{ fontFamily: '"Poppins", sans-serif' }}>
+    Header Image
+  </h3>
+  <div className="relative">
+    {headerImage ? (
+      <img
+        src={headerImage}
+        alt="Event header"
+        className="w-full h-48 object-cover rounded-lg"
+      />
+    ) : (
+      <div className="w-full h-48 bg-gray-800 rounded-lg flex items-center justify-center">
+        <span className="text-gray-400 text-sm" style={{ fontFamily: '"Poppins", sans-serif' }}>
+          No header image
+        </span>
+      </div>
+    )}
+  </div>
+  <input
+    type="file"
+    accept="image/*"
+    onChange={(e) => handleImageUpload(e, "header")}
+    className="hidden"
+    id="header-upload"
+    ref={headerFileInputRef}
+    disabled={isSubmitting}
+  />
+  <label
+    htmlFor="header-upload"
+    className="mt-4 block border-2 border-dashed border-gray-600 rounded-lg p-4 text-center hover:border-gray-500 transition-colors cursor-pointer"
+  >
+    <Upload className="w-6 h-6 text-gray-400 mx-auto mb-2" />
+    <p className="text-gray-400 text-sm" style={{ fontFamily: '"Poppins", sans-serif' }}>
+      {headerImage ? "Replace Header Image" : "Upload Header Image"}
+    </p>
+  </label>
+</div>
 
               {/* Gallery Images */}
               <div>
