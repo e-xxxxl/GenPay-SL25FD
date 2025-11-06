@@ -611,6 +611,7 @@ const Explore = () => {
     'Health & Wellness',
     'Education',
     'Entertainment',
+    'Religious',
     'Networking',
     'Other',
   ];

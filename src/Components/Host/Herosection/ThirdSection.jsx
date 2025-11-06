@@ -177,6 +177,7 @@ const ThirdSection = ({ onCreateEvent }) => {
     "Health & Wellness",
     "Education",
     "Entertainment",
+    "Religious",
     "Networking",
     "Other",
   ];

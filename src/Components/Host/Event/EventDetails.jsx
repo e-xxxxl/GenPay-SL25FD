@@ -29,6 +29,7 @@ const eventCategories = [
   "Health & Wellness",
   "Education",
   "Entertainment",
+  "Religious",
   "Networking",
   "Other",
 ]
