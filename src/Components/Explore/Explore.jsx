@@ -557,7 +557,8 @@ const Explore = () => {
     const slug = event.slug || event.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/-+/g, '-').trim();
     navigate(`/explore/${slug}`, { state: { event } });
   };
-
+  
+const normalized = (c) => (c && String(c).trim()) || 'Other';
   // Date helpers for dropdown filters
   const isToday = (date) => {
     const today = new Date();
@@ -616,7 +617,7 @@ const Explore = () => {
     'Other',
   ];
 
-  const normalized = (c) => (c && String(c).trim()) || 'Other';
+  
 
   // Group by category
   const grouped = useMemo(() => {
