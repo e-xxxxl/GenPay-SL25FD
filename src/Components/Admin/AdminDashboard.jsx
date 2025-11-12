@@ -168,12 +168,12 @@ const AdminDashboard = () => {
       formData.append('proofOfPayment', approvalForm.proofOfPayment)
     }
 
-    console.log('Sending form data:', {
-      payoutId: selectedPayout._id,
-      approvedAmount: approvalForm.approvedAmount,
-      notes: approvalForm.notes,
-      hasFile: !!approvalForm.proofOfPayment
-    })
+    // console.log('Sending form data:', {
+    //   payoutId: selectedPayout._id,
+    //   approvedAmount: approvalForm.approvedAmount,
+    //   notes: approvalForm.notes,
+    //   hasFile: !!approvalForm.proofOfPayment
+    // })
 
     const response = await fetch(`${API_BASE_URL}/api/admin/payouts/approve`, {
       method: 'POST',
@@ -190,7 +190,7 @@ const AdminDashboard = () => {
     }
 
     const result = await response.json()
-    console.log('Payout approved successfully:', result)
+    // console.log('Payout approved successfully:', result)
     
     setShowPayoutModal(false)
     setApprovalForm({ approvedAmount: "", notes: "", proofOfPayment: null })

@@ -75,11 +75,11 @@ const Verified = ({ onContinue }) => {
       }
 
       try {
-        console.log("Verifying token:", token) // Debug log
+        // console.log("Verifying token:", token) // Debug log
 
         const response = await axios.get(`https://genpay-sl25bd-1.onrender.com/api/auth/verify-email/${token}`)
 
-        console.log("Verification response:", response.data) // Debug log
+        // console.log("Verification response:", response.data) // Debug log
 
         if (response.data.status === "success") {
           localStorage.setItem("token", response.data.token)

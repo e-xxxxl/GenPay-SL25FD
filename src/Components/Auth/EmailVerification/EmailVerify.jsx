@@ -41,7 +41,7 @@ const handleResendCode = async () => {
   setIsResending(true);
 
   try {
-    console.log("Resending verification email for:", email);
+    // console.log("Resending verification email for:", email);
 
     await axios.post(
   "https://genpay-sl25bd-1.onrender.com/api/auth/resend-verification",
